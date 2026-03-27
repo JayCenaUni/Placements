@@ -6,3 +6,5 @@ db/*.db
 db/*.db-journal
 .env
 *.local
+
+.cursor/
