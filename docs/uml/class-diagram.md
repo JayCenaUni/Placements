@@ -1,6 +1,10 @@
 # Class Diagram
 
-Shows all domain entities, their attributes, and relationships.
+Shows all domain entities, their attributes, and relationships. Split into two diagrams to avoid overlap.
+
+## 1. Authentication Entities
+
+Managed by Better Auth. These tables handle user identity, credentials, and sessions.
 
 ```mermaid
 classDiagram
@@ -10,7 +14,7 @@ classDiagram
         +String email UK
         +Boolean emailVerified
         +String image
-        +Role role
+        +String role : apprentice | apprentice_manager | placement_manager
         +DateTime createdAt
         +DateTime updatedAt
     }
@@ -51,6 +55,23 @@ classDiagram
         +DateTime updatedAt
     }
 
+    User "1" --> "*" Session : has
+    User "1" --> "*" Account : has
+```
+
+## 2. Domain Entities
+
+The core application model: placements, applications, reviews, assignments, and requests.
+
+```mermaid
+classDiagram
+    class User {
+        +String id PK
+        +String name
+        +String email UK
+        +String role
+    }
+
     class ApprenticeProfile {
         +String id PK
         +String userId FK UK
@@ -73,7 +94,7 @@ classDiagram
         +String endDate
         +Integer capacity
         +String placementManagerId FK
-        +PlacementStatus status
+        +String status : draft | open | filled | closed
         +DateTime createdAt
         +DateTime updatedAt
     }
@@ -83,7 +104,7 @@ classDiagram
         +String apprenticeId FK
         +String placementId FK
         +String coverMessage
-        +ApplicationStatus status
+        +String status : pending | approved | denied | withdrawn
         +String reviewedBy FK
         +DateTime reviewedAt
         +DateTime appliedAt
@@ -111,60 +132,24 @@ classDiagram
         +String placementManagerId FK
         +String placementId FK
         +String message
-        +RequestStatus status
+        +String status : open | accepted | declined
         +DateTime createdAt
     }
 
-    class Role {
-        <<enumeration>>
-        apprentice
-        apprentice_manager
-        placement_manager
-    }
-
-    class PlacementStatus {
-        <<enumeration>>
-        draft
-        open
-        filled
-        closed
-    }
-
-    class ApplicationStatus {
-        <<enumeration>>
-        pending
-        approved
-        denied
-        withdrawn
-    }
-
-    class RequestStatus {
-        <<enumeration>>
-        open
-        accepted
-        declined
-    }
-
-    User "1" --> "*" Session : has
-    User "1" --> "*" Account : has
     User "1" --> "0..1" ApprenticeProfile : has profile
     User "1" --> "*" Placement : manages
-    User "1" --> "*" Application : submits (as apprentice)
-    User "1" --> "*" Application : reviews (reviewedBy)
+    User "1" --> "*" Application : submits
     User "1" --> "*" Review : writes
-    User "1" --> "*" ManagerAssignment : manages (as AM)
-    User "1" --> "0..1" ManagerAssignment : assigned to (as apprentice)
-    User "1" --> "*" ApprenticeRequest : creates (as PM)
+    User "1" --> "*" ManagerAssignment : assigned as manager
+    User "1" --> "*" ApprenticeRequest : creates
 
     Placement "1" --> "*" Application : receives
-    Placement "1" --> "*" Review : receives
-    Placement "1" --> "*" ApprenticeRequest : linked to
-    Placement "1" --> "*" ApprenticeProfile : current placement of
+    Placement "1" --> "*" Review : has
+    Placement "1" --> "*" ApprenticeRequest : target of
+    Placement "1" --> "*" ApprenticeProfile : current for
 
-    User ..> Role : has role
-    Placement ..> PlacementStatus : has status
-    Application ..> ApplicationStatus : has status
-    ApprenticeRequest ..> RequestStatus : has status
+    Application "*" --> "0..1" User : reviewedBy
+    ManagerAssignment "*" --> "1" User : apprentice
 ```
 
 ## Relationship Summary
@@ -175,13 +160,22 @@ classDiagram
 | User → Account | 1 to many | Each user has at least one credential account (cascade delete) |
 | User → ApprenticeProfile | 1 to 0..1 | Apprentices have one optional profile (cascade delete) |
 | User → Placement | 1 to many | Placement managers create and own placements |
-| User → Application (apprentice) | 1 to many | Apprentices submit applications |
-| User → Application (reviewer) | 1 to many | Managers review applications (set null on delete) |
+| User → Application (submits) | 1 to many | Apprentices submit applications |
+| User → Application (reviewedBy) | many to 0..1 | Managers review applications (set null on delete) |
 | User → Review | 1 to many | Apprentices write reviews |
-| User → ManagerAssignment (manager) | 1 to many | Apprentice managers are assigned multiple apprentices |
-| User → ManagerAssignment (apprentice) | 1 to 0..1 | Each apprentice has at most one manager assignment |
+| User → ManagerAssignment (manager) | 1 to many | Apprentice managers oversee multiple apprentices |
+| User → ManagerAssignment (apprentice) | many to 1 | Each apprentice has at most one manager |
 | User → ApprenticeRequest | 1 to many | Placement managers create apprentice requests |
 | Placement → Application | 1 to many | Each placement receives applications (cascade delete) |
 | Placement → Review | 1 to many | Each placement receives reviews (cascade delete) |
 | Placement → ApprenticeRequest | 1 to many | Placement managers request apprentices for placements |
 | Placement → ApprenticeProfile | 1 to many | Tracks which apprentices are currently on this placement |
+
+## Enumeration Values
+
+| Field | Values |
+|---|---|
+| `User.role` | `apprentice`, `apprentice_manager`, `placement_manager` |
+| `Placement.status` | `draft`, `open`, `filled`, `closed` |
+| `Application.status` | `pending`, `approved`, `denied`, `withdrawn` |
+| `ApprenticeRequest.status` | `open`, `accepted`, `declined` |

@@ -5,51 +5,41 @@ Shows the system architecture and how the major components interact.
 ```mermaid
 graph TB
     subgraph Client["Client (Browser)"]
-        subgraph UI["React UI Layer"]
-            Router["TanStack Router<br/>(File-based Routes)"]
-            Pages["Route Pages<br/>/dashboard, /placements,<br/>/applications, /reviews, etc."]
-            Components["Shared Components<br/>Sidebar, UI Primitives"]
-        end
-        AuthClient["Better Auth Client<br/>signIn, signUp, signOut,<br/>useSession"]
-        StyleEngine["Tailwind CSS v4<br/>+ shadcn/ui"]
+        Router[TanStack Router]
+        Pages[Route Pages]
+        Components[Shared Components]
+        AuthClient[Better Auth Client]
+        Styles[Tailwind CSS v4 + shadcn/ui]
     end
 
     subgraph Server["Server (TanStack Start SSR)"]
         subgraph RouteHandlers["Route Layer"]
-            BeforeLoad["beforeLoad Guards<br/>(Auth + Role checks)"]
-            Loaders["Route Loaders<br/>(Data fetching via server fns)"]
+            BeforeLoad[beforeLoad Guards]
+            Loaders[Route Loaders]
         end
 
-        subgraph ServerFunctions["Server Functions (RPC)"]
-            SF_Dashboard["dashboard.ts<br/>getApprenticeDashboard<br/>getApprenticeManagerDashboard<br/>getPlacementManagerDashboard"]
-            SF_Placements["placements.ts<br/>listPlacements, getPlacement<br/>createPlacement, updatePlacement<br/>applyToPlacement"]
-            SF_Applications["applications.ts<br/>listApplications<br/>getApplication<br/>reviewApplication"]
-            SF_Reviews["reviews.ts<br/>listReviews<br/>getReviewablePlacements<br/>createReview"]
-            SF_Apprentices["apprentices.ts<br/>listApprentices, getApprentice<br/>getProfile, updateProfile"]
-            SF_Managers["managers.ts<br/>listPlacementManagers"]
-            SF_Requests["requests.ts<br/>listRequests, getManagerPlacements<br/>createRequest, updateRequestStatus"]
-        end
+        ServerFunctions[Server Functions]
 
         subgraph AuthServer["Authentication"]
-            BetterAuth["Better Auth Server<br/>Email/Password provider<br/>Session management (7-day)"]
-            AuthAPI["API Route Handler<br/>/api/auth/*"]
-            AuthHelpers["Auth Helpers<br/>getSession, ensureSession"]
+            BetterAuth[Better Auth Server]
+            AuthAPI["/api/auth/*"]
+            AuthHelpers[getSession / ensureSession]
         end
 
         subgraph DataLayer["Data Access Layer"]
-            DrizzleORM["Drizzle ORM<br/>(Query builder + schema)"]
-            Validation["Zod v4<br/>Input validation"]
+            DrizzleORM[Drizzle ORM]
+            Validation[Zod v4]
         end
     end
 
     subgraph Database["Database"]
-        SQLite["SQLite<br/>(via @libsql/client)<br/>placements.db"]
+        SQLite[SQLite via libsql]
     end
 
     Router --> Pages
     Pages --> Components
+    Pages --> Styles
     Pages --> AuthClient
-    Pages --> StyleEngine
 
     Router --> BeforeLoad
     BeforeLoad --> AuthHelpers
@@ -60,14 +50,8 @@ graph TB
     AuthAPI --> BetterAuth
     BetterAuth --> DrizzleORM
 
-    SF_Dashboard --> DrizzleORM
-    SF_Placements --> DrizzleORM
-    SF_Placements --> Validation
-    SF_Applications --> DrizzleORM
-    SF_Reviews --> DrizzleORM
-    SF_Apprentices --> DrizzleORM
-    SF_Managers --> DrizzleORM
-    SF_Requests --> DrizzleORM
+    ServerFunctions --> Validation
+    ServerFunctions --> DrizzleORM
 
     DrizzleORM --> SQLite
 ```
@@ -85,3 +69,15 @@ graph TB
 | **Auth Server** | Better Auth + Drizzle adapter | Session management, password hashing, cookie-based auth |
 | **ORM** | Drizzle ORM | Type-safe SQL query building, schema definition, migrations |
 | **Database** | SQLite via @libsql/client | Persistent storage (file-based, Turso-compatible) |
+
+## Server Functions Detail
+
+| Module | Functions |
+|---|---|
+| `dashboard.ts` | getApprenticeDashboard, getApprenticeManagerDashboard, getPlacementManagerDashboard |
+| `placements.ts` | listPlacements, getPlacement, createPlacement, updatePlacement, applyToPlacement |
+| `applications.ts` | listApplications, getApplication, reviewApplication |
+| `reviews.ts` | listReviews, getReviewablePlacements, createReview |
+| `apprentices.ts` | listApprentices, getApprentice, getProfile, updateProfile |
+| `managers.ts` | listPlacementManagers |
+| `requests.ts` | listRequests, getManagerPlacements, createRequest, updateRequestStatus |
