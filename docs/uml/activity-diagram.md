@@ -97,7 +97,38 @@ flowchart TD
     Declined --> DoneDeclined([Request closed])
 ```
 
-## 4. Authentication Flow
+## 4. Apprentice Manager Dashboard Flow
+
+The workflow for an apprentice manager viewing apprentice locations and drilling into detail.
+
+```mermaid
+flowchart TD
+    Start([Manager navigates to Dashboard]) --> LoadData
+
+    subgraph DataLoad ["Server: getApprenticeManagerDashboard"]
+        LoadData[Load manager assignments]
+        LoadData --> FetchPlacements[Join current placements + placement managers]
+        FetchPlacements --> FetchApps[Fetch pending applications per apprentice]
+        FetchApps --> BuildTable[Build apprentice location table]
+    end
+
+    BuildTable --> RenderDash[Render Apprentice Locations Dashboard]
+
+    RenderDash --> ViewTable[View table: apprentice, placement, manager, desired next]
+
+    ViewTable --> DrillDown{Drill down into apprentice?}
+    DrillDown -->|Yes| LoadDetail[Load apprentice detail + placement history]
+    DrillDown -->|No| ViewTable
+
+    LoadDetail --> ShowDetail[Show profile, current placement, history timeline]
+    ShowDetail --> HasPending{Has pending applications?}
+    HasPending -->|Yes| ShowDesired[Show desired next placement]
+    HasPending -->|No| ShowDetail
+    ShowDesired --> Done([Manager has full overview])
+    ShowDetail --> Done
+```
+
+## 5. Authentication Flow
 
 The complete user authentication lifecycle.
 

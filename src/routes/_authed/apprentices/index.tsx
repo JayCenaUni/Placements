@@ -75,9 +75,11 @@ function ApprenticesListPage() {
                       <p className="text-xs text-muted-foreground">{a.cohort}</p>
                     )}
                     <div className="pt-1">
-                      <Badge variant={a.currentPlacementTitle ? "success" : "warning"}>
-                        {a.currentPlacementTitle || "Unplaced"}
-                      </Badge>
+                      {a.currentPlacementTitle ? (
+                        <Badge variant="success">{a.currentPlacementTitle}</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">No placement assigned</span>
+                      )}
                     </div>
                   </div>
                 </CardContent>

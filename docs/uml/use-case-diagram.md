@@ -30,14 +30,14 @@ graph LR
     AM --- Register
     AM --- Login
     AM --- Logout
-    AM --- Dashboard[View Dashboard]
+    AM --- Dashboard[View Apprentice Locations Dashboard]
     AM --- Profile[Manage Profile]
     AM --- Browse[Browse Placements]
     AM --- ViewP[View Placement Details]
     AM --- ViewApps[View Managed Applications]
     AM --- ViewRevs[View Reviews]
     AM --- ViewList[View Apprentices]
-    AM --- ViewDetail[View Apprentice Details]
+    AM --- ViewDetail[View Apprentice Detail + History]
     AM --- Managers[View Manager Assignments]
 ```
 
@@ -70,7 +70,7 @@ graph LR
 | Use Case | Apprentice | Apprentice Manager | Placement Manager |
 |---|:---:|:---:|:---:|
 | Register / Login / Logout | x | x | x |
-| View Dashboard | x | x | x |
+| View Dashboard | x | x (apprentice locations, desired next placements) | x |
 | Manage Profile | x | x | x |
 | Browse Placements | x | x | x |
 | View Placement Details | x | x | x |
@@ -79,7 +79,7 @@ graph LR
 | Apply to Placement | x | | |
 | Write Placement Review | x | | |
 | View Apprentices | | x | x |
-| View Apprentice Details | | x | x |
+| View Apprentice Details + History | | x | x |
 | View Manager Assignments | | x | |
 | Create Placement | | | x |
 | Update Placement | | | x |

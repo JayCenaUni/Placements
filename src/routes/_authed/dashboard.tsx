@@ -21,6 +21,8 @@ import {
   Star,
   ArrowRight,
   Send,
+  MoveRight,
+  MapPin,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/dashboard")({
@@ -161,9 +163,9 @@ function ApprenticeDashboard({ data }: { data: ApprenticeData }) {
 function ApprenticeManagerDashboard({ data }: { data: AMData }) {
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold">Manager Dashboard</h2>
+      <h2 className="text-3xl font-bold">Apprentice Locations</h2>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Apprentices</CardTitle>
@@ -176,21 +178,11 @@ function ApprenticeManagerDashboard({ data }: { data: AMData }) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Placed</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active Placements</CardTitle>
+            <MapPin className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-green-600">{data.placed}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Unplaced</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-orange-600">{data.unplaced}</p>
+            <p className="text-2xl font-bold">{data.activePlacements}</p>
           </CardContent>
         </Card>
 
@@ -208,76 +200,100 @@ function ApprenticeManagerDashboard({ data }: { data: AMData }) {
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Apprentices</CardTitle>
-            <CardDescription>Your managed apprentices</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.apprentices.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No apprentices assigned yet.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {data.apprentices.map((a) => (
-                  <Link
-                    key={a.id}
-                    to="/apprentices/$apprenticeId"
-                    params={{ apprenticeId: a.id }}
-                    className="flex items-center justify-between rounded-md border p-3 hover:bg-accent"
-                  >
-                    <div>
-                      <p className="font-medium">{a.name}</p>
-                      <p className="text-xs text-muted-foreground">{a.email}</p>
-                    </div>
-                    <Badge variant={a.hasPlacement ? "success" : "warning"}>
-                      {a.hasPlacement ? "Placed" : "Unplaced"}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Applications</CardTitle>
-            <CardDescription>Applications awaiting your review</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {data.pendingApplications.length === 0 ? (
-              <p className="py-4 text-center text-sm text-muted-foreground">
-                No pending applications.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {data.pendingApplications.map((app) => (
-                  <Link
-                    key={app.id}
-                    to="/applications/$applicationId"
-                    params={{ applicationId: app.id }}
-                    className="flex items-center justify-between rounded-md border p-3 hover:bg-accent"
-                  >
-                    <div>
-                      <p className="font-medium">{app.apprenticeName}</p>
-                      <p className="text-xs text-muted-foreground">{app.placementTitle}</p>
-                    </div>
-                    <Badge variant="warning">Pending</Badge>
-                  </Link>
-                ))}
-                <Button variant="ghost" asChild className="w-full">
-                  <Link to="/applications">
-                    View all <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Apprentice Placement Overview</CardTitle>
+          <CardDescription>
+            Where each apprentice is currently placed and where they wish to go next
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {data.apprentices.length === 0 ? (
+            <p className="py-8 text-center text-sm text-muted-foreground">
+              No apprentices assigned yet.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left">
+                    <th className="pb-3 pr-4 font-medium text-muted-foreground">Apprentice</th>
+                    <th className="pb-3 pr-4 font-medium text-muted-foreground">Current Placement</th>
+                    <th className="pb-3 pr-4 font-medium text-muted-foreground">Placement Manager</th>
+                    <th className="pb-3 pr-4 font-medium text-muted-foreground">Desired Next Placement</th>
+                    <th className="pb-3 font-medium text-muted-foreground"><span className="sr-only">Actions</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.apprentices.map((a) => (
+                    <tr key={a.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4">
+                        <Link
+                          to="/apprentices/$apprenticeId"
+                          params={{ apprenticeId: a.id }}
+                          className="hover:underline"
+                        >
+                          <p className="font-medium">{a.name}</p>
+                          <p className="text-xs text-muted-foreground">{a.email}</p>
+                        </Link>
+                      </td>
+                      <td className="py-3 pr-4">
+                        {a.currentPlacement ? (
+                          <Link
+                            to="/placements/$placementId"
+                            params={{ placementId: a.currentPlacement.id }}
+                            className="hover:underline"
+                          >
+                            <p className="font-medium">{a.currentPlacement.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {a.currentPlacement.department}
+                            </p>
+                          </Link>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {a.placementManagerName ? (
+                          <span>{a.placementManagerName}</span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 pr-4">
+                        {a.desiredNextPlacement ? (
+                          <div className="flex items-center gap-2">
+                            <MoveRight className="h-4 w-4 shrink-0 text-primary" />
+                            <Link
+                              to="/placements/$placementId"
+                              params={{ placementId: a.desiredNextPlacement.placementId }}
+                              className="font-medium text-primary hover:underline"
+                            >
+                              {a.desiredNextPlacement.placementTitle}
+                            </Link>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">No application</span>
+                        )}
+                      </td>
+                      <td className="py-3">
+                        <Button variant="ghost" size="sm" asChild>
+                          <Link
+                            to="/apprentices/$apprenticeId"
+                            params={{ apprenticeId: a.id }}
+                          >
+                            View <ArrowRight className="ml-1 h-3 w-3" />
+                          </Link>
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

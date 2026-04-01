@@ -168,7 +168,50 @@ sequenceDiagram
     end
 ```
 
-## 7. Apprentice Writes Review
+## 7. Apprentice Manager Views Dashboard
+
+```mermaid
+sequenceDiagram
+    actor AM as Apprentice Manager
+    participant DP as Dashboard Page
+    participant SF as getApprenticeManagerDashboard()
+    participant DB as SQLite
+
+    AM->>DP: Navigate to /dashboard
+    DP->>SF: getApprenticeManagerDashboard(userId)
+    SF->>DB: SELECT assignments JOIN user, profile, placement, placement_manager
+    DB-->>SF: Apprentice rows with placement details
+    SF->>DB: SELECT pending applications for managed apprentices
+    DB-->>SF: Pending applications
+    SF-->>DP: { apprentices (with placements, managers, desired next), stats }
+    DP-->>AM: Render apprentice locations table
+
+    AM->>DP: Click apprentice row
+    DP->>DP: Navigate to /apprentices/{id}
+```
+
+## 8. Apprentice Manager Views Apprentice Detail
+
+```mermaid
+sequenceDiagram
+    actor AM as Apprentice Manager
+    participant AD as Apprentice Detail Page
+    participant SF as getApprentice()
+    participant DB as SQLite
+
+    AM->>AD: Navigate to /apprentices/{id}
+    AD->>SF: getApprentice(apprenticeId)
+    SF->>DB: SELECT user JOIN profile, placement, placement_manager
+    DB-->>SF: Apprentice with current placement
+    SF->>DB: SELECT approved applications JOIN placement (history)
+    DB-->>SF: Placement history
+    SF->>DB: SELECT pending applications JOIN placement (desired next)
+    DB-->>SF: Pending applications
+    SF-->>AD: { profile, placement, history, pendingApplications }
+    AD-->>AM: Render profile, current placement, history timeline, desired next
+```
+
+## 9. Apprentice Writes Review
 
 ```mermaid
 sequenceDiagram

@@ -63,18 +63,30 @@ export const getApprenticeManagerDashboard = createServerFn({ method: "GET" })
       .select({
         apprentice: user,
         profile: apprenticeProfile,
+        placementTitle: placement.title,
+        placementDepartment: placement.department,
+        placementId: placement.id,
+        placementManagerName: sql<string | null>`pm.name`,
       })
       .from(managerAssignment)
       .innerJoin(user, eq(managerAssignment.apprenticeId, user.id))
       .leftJoin(apprenticeProfile, eq(user.id, apprenticeProfile.userId))
+      .leftJoin(placement, eq(apprenticeProfile.currentPlacementId, placement.id))
+      .leftJoin(
+        sql`user as pm`,
+        sql`pm.id = ${placement.placementManagerId}`
+      )
       .where(eq(managerAssignment.managerId, userId));
 
     const apprenticeIds = assignments.map((a) => a.apprentice.id);
 
-    let pendingApplications: (typeof application.$inferSelect & {
+    let pendingApplications: {
+      id: string;
+      apprenticeId: string;
       apprenticeName: string;
+      placementId: string;
       placementTitle: string;
-    })[] = [];
+    }[] = [];
 
     if (apprenticeIds.length > 0) {
       const apps = await db
@@ -97,26 +109,51 @@ export const getApprenticeManagerDashboard = createServerFn({ method: "GET" })
         );
 
       pendingApplications = apps.map((a) => ({
-        ...a.application,
+        id: a.application.id,
+        apprenticeId: a.application.apprenticeId,
         apprenticeName: a.apprenticeName,
+        placementId: a.application.placementId,
         placementTitle: a.placementTitle,
       }));
     }
 
-    const placed = assignments.filter((a) => a.profile?.currentPlacementId).length;
-    const unplaced = assignments.length - placed;
+    const pendingByApprentice = new Map<
+      string,
+      { placementId: string; placementTitle: string; applicationId: string }
+    >();
+    for (const app of pendingApplications) {
+      if (!pendingByApprentice.has(app.apprenticeId)) {
+        pendingByApprentice.set(app.apprenticeId, {
+          placementId: app.placementId,
+          placementTitle: app.placementTitle,
+          applicationId: app.id,
+        });
+      }
+    }
+
+    const uniquePlacements = new Set(
+      assignments
+        .map((a) => a.placementId)
+        .filter(Boolean)
+    );
 
     return {
       totalApprentices: assignments.length,
-      placed,
-      unplaced,
+      activePlacements: uniquePlacements.size,
       pendingApplicationsCount: pendingApplications.length,
-      pendingApplications: pendingApplications.slice(0, 5),
       apprentices: assignments.map((a) => ({
         id: a.apprentice.id,
         name: a.apprentice.name,
         email: a.apprentice.email,
-        hasPlacement: !!a.profile?.currentPlacementId,
+        currentPlacement: a.placementId
+          ? {
+              id: a.placementId,
+              title: a.placementTitle!,
+              department: a.placementDepartment!,
+            }
+          : null,
+        placementManagerName: a.placementManagerName ?? null,
+        desiredNextPlacement: pendingByApprentice.get(a.apprentice.id) ?? null,
       })),
     };
   });

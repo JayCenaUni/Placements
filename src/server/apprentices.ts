@@ -5,8 +5,9 @@ import {
   apprenticeProfile,
   managerAssignment,
   placement,
+  application,
 } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 
 export const listApprentices = createServerFn({ method: "GET" })
   .inputValidator((input: { userId: string; role: string }) => input)
@@ -66,16 +67,54 @@ export const getApprentice = createServerFn({ method: "GET" })
         user: user,
         profile: apprenticeProfile,
         currentPlacementTitle: placement.title,
+        currentPlacementDepartment: placement.department,
+        placementManagerName: sql<string | null>`pm.name`,
       })
       .from(user)
       .leftJoin(apprenticeProfile, eq(user.id, apprenticeProfile.userId))
       .leftJoin(placement, eq(apprenticeProfile.currentPlacementId, placement.id))
+      .leftJoin(
+        sql`user as pm`,
+        sql`pm.id = ${placement.placementManagerId}`
+      )
       .where(eq(user.id, id))
       .limit(1);
 
     if (result.length === 0) return null;
 
     const r = result[0];
+
+    const approvedApps = await db
+      .select({
+        application: application,
+        placementTitle: placement.title,
+        placementDepartment: placement.department,
+      })
+      .from(application)
+      .innerJoin(placement, eq(application.placementId, placement.id))
+      .where(
+        and(
+          eq(application.apprenticeId, id),
+          eq(application.status, "approved")
+        )
+      )
+      .orderBy(sql`${application.reviewedAt} DESC`);
+
+    const pendingApps = await db
+      .select({
+        application: application,
+        placementTitle: placement.title,
+      })
+      .from(application)
+      .innerJoin(placement, eq(application.placementId, placement.id))
+      .where(
+        and(
+          eq(application.apprenticeId, id),
+          eq(application.status, "pending")
+        )
+      )
+      .orderBy(sql`${application.appliedAt} DESC`);
+
     return {
       id: r.user.id,
       name: r.user.name,
@@ -83,6 +122,19 @@ export const getApprentice = createServerFn({ method: "GET" })
       role: r.user.role,
       profile: r.profile,
       currentPlacementTitle: r.currentPlacementTitle ?? null,
+      currentPlacementDepartment: r.currentPlacementDepartment ?? null,
+      placementManagerName: r.placementManagerName ?? null,
+      placementHistory: approvedApps.map((a) => ({
+        placementId: a.application.placementId,
+        placementTitle: a.placementTitle,
+        department: a.placementDepartment,
+        approvedAt: a.application.reviewedAt,
+      })),
+      pendingApplications: pendingApps.map((a) => ({
+        applicationId: a.application.id,
+        placementTitle: a.placementTitle,
+        appliedAt: a.application.appliedAt,
+      })),
     };
   });
 

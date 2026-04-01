@@ -74,7 +74,7 @@ graph TB
 
 | Module | Functions |
 |---|---|
-| `dashboard.ts` | getApprenticeDashboard, getApprenticeManagerDashboard, getPlacementManagerDashboard |
+| `dashboard.ts` | getApprenticeDashboard, getApprenticeManagerDashboard (apprentice locations + desired placements), getPlacementManagerDashboard |
 | `placements.ts` | listPlacements, getPlacement, createPlacement, updatePlacement, applyToPlacement |
 | `applications.ts` | listApplications, getApplication, reviewApplication |
 | `reviews.ts` | listReviews, getReviewablePlacements, createReview |
