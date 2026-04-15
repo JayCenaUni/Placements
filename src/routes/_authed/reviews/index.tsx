@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { listReviews } from "@/server/reviews";
-import { ListChecks, Plus } from "lucide-react";
+import { ListChecks, Plus, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/reviews/")({
   loader: async ({ context }) => {
@@ -30,20 +30,17 @@ export const Route = createFileRoute("/_authed/reviews/")({
 
 const achievementMeta: Record<
   "not_achieved" | "partially_achieved" | "fully_achieved",
-  { label: string; className: string; dotClass: string }
+  { className: string; dotClass: string }
 > = {
   not_achieved: {
-    label: "Not achieved",
     className: "border-red-200 bg-red-50 text-red-700",
     dotClass: "bg-red-600",
   },
   partially_achieved: {
-    label: "Partially achieved",
     className: "border-orange-200 bg-orange-50 text-orange-700",
     dotClass: "bg-orange-500",
   },
   fully_achieved: {
-    label: "Fully achieved",
     className: "border-green-200 bg-green-50 text-green-700",
     dotClass: "bg-green-600",
   },
@@ -55,7 +52,7 @@ function ReviewsListPage() {
   const isApprentice = session.user.role === "apprentice";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold">Reviews</h2>
@@ -85,41 +82,47 @@ function ReviewsListPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-2.5">
           {reviews.map((r) => (
             <Card key={r.id}>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{r.placementTitle}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
+                    <CardTitle className="text-base leading-tight">{r.placementTitle}</CardTitle>
+                    <p className="text-xs text-muted-foreground">
                       {r.placementDepartment}
                     </p>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {r.competencies.map((item) => {
-                    const meta = achievementMeta[item.achievement];
-                    return (
-                      <div
-                        key={item.competencyId}
-                        className="flex items-center justify-between rounded-md border p-2"
-                      >
-                        <p className="text-sm font-medium">{item.competencyName}</p>
-                        <Badge variant="outline" className={meta.className}>
+              <CardContent className="pt-0">
+                <div className="flex flex-wrap gap-1.5">
+                  {(["not_achieved", "partially_achieved", "fully_achieved"] as const).map(
+                    (key) => {
+                      const meta = achievementMeta[key];
+                      const count = r.competencies.filter((c) => c.achievement === key).length;
+                      return (
+                        <Badge
+                          key={key}
+                          variant="outline"
+                          className={`${meta.className} px-1.5 py-0 text-[11px]`}
+                        >
                           <span className={`mr-1.5 h-2 w-2 rounded-full ${meta.dotClass}`} />
-                          {meta.label}
+                          {count}
                         </Badge>
-                      </div>
-                    );
-                  })}
+                      );
+                    }
+                  )}
                 </div>
-                <p className="mt-3 text-xs text-muted-foreground">
+                <p className="mt-2 text-[11px] text-muted-foreground">
                   by {r.apprenticeName} &middot;{" "}
                   {new Date(r.createdAt).toLocaleDateString()}
                 </p>
+                <Button asChild variant="ghost" size="sm" className="mt-1 h-7 px-0 text-xs">
+                  <Link to="/reviews/$reviewId" params={{ reviewId: r.id }}>
+                    View details <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           ))}

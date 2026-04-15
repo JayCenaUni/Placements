@@ -23,6 +23,7 @@ import { Route as AuthedApprenticesIndexRouteImport } from './routes/_authed/app
 import { Route as AuthedApplicationsIndexRouteImport } from './routes/_authed/applications/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as AuthedReviewsNewRouteImport } from './routes/_authed/reviews/new'
+import { Route as AuthedReviewsReviewIdRouteImport } from './routes/_authed/reviews/$reviewId'
 import { Route as AuthedRequestsNewRouteImport } from './routes/_authed/requests/new'
 import { Route as AuthedPlacementsNewRouteImport } from './routes/_authed/placements/new'
 import { Route as AuthedPlacementsPlacementIdRouteImport } from './routes/_authed/placements/$placementId'
@@ -98,6 +99,11 @@ const AuthedReviewsNewRoute = AuthedReviewsNewRouteImport.update({
   path: '/reviews/new',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedReviewsReviewIdRoute = AuthedReviewsReviewIdRouteImport.update({
+  id: '/reviews/$reviewId',
+  path: '/reviews/$reviewId',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const AuthedRequestsNewRoute = AuthedRequestsNewRouteImport.update({
   id: '/requests/new',
   path: '/requests/new',
@@ -138,6 +144,7 @@ export interface FileRoutesByFullPath {
   '/placements/$placementId': typeof AuthedPlacementsPlacementIdRoute
   '/placements/new': typeof AuthedPlacementsNewRoute
   '/requests/new': typeof AuthedRequestsNewRoute
+  '/reviews/$reviewId': typeof AuthedReviewsReviewIdRoute
   '/reviews/new': typeof AuthedReviewsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/applications/': typeof AuthedApplicationsIndexRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/placements/$placementId': typeof AuthedPlacementsPlacementIdRoute
   '/placements/new': typeof AuthedPlacementsNewRoute
   '/requests/new': typeof AuthedRequestsNewRoute
+  '/reviews/$reviewId': typeof AuthedReviewsReviewIdRoute
   '/reviews/new': typeof AuthedReviewsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/applications': typeof AuthedApplicationsIndexRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/_authed/placements/$placementId': typeof AuthedPlacementsPlacementIdRoute
   '/_authed/placements/new': typeof AuthedPlacementsNewRoute
   '/_authed/requests/new': typeof AuthedRequestsNewRoute
+  '/_authed/reviews/$reviewId': typeof AuthedReviewsReviewIdRoute
   '/_authed/reviews/new': typeof AuthedReviewsNewRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/_authed/applications/': typeof AuthedApplicationsIndexRoute
@@ -202,6 +211,7 @@ export interface FileRouteTypes {
     | '/placements/$placementId'
     | '/placements/new'
     | '/requests/new'
+    | '/reviews/$reviewId'
     | '/reviews/new'
     | '/api/auth/$'
     | '/applications/'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/placements/$placementId'
     | '/placements/new'
     | '/requests/new'
+    | '/reviews/$reviewId'
     | '/reviews/new'
     | '/api/auth/$'
     | '/applications'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/_authed/placements/$placementId'
     | '/_authed/placements/new'
     | '/_authed/requests/new'
+    | '/_authed/reviews/$reviewId'
     | '/_authed/reviews/new'
     | '/api/auth/$'
     | '/_authed/applications/'
@@ -361,6 +373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedReviewsNewRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/reviews/$reviewId': {
+      id: '/_authed/reviews/$reviewId'
+      path: '/reviews/$reviewId'
+      fullPath: '/reviews/$reviewId'
+      preLoaderRoute: typeof AuthedReviewsReviewIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/requests/new': {
       id: '/_authed/requests/new'
       path: '/requests/new'
@@ -407,6 +426,7 @@ interface AuthedRouteChildren {
   AuthedPlacementsPlacementIdRoute: typeof AuthedPlacementsPlacementIdRoute
   AuthedPlacementsNewRoute: typeof AuthedPlacementsNewRoute
   AuthedRequestsNewRoute: typeof AuthedRequestsNewRoute
+  AuthedReviewsReviewIdRoute: typeof AuthedReviewsReviewIdRoute
   AuthedReviewsNewRoute: typeof AuthedReviewsNewRoute
   AuthedApplicationsIndexRoute: typeof AuthedApplicationsIndexRoute
   AuthedApprenticesIndexRoute: typeof AuthedApprenticesIndexRoute
@@ -424,6 +444,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedPlacementsPlacementIdRoute: AuthedPlacementsPlacementIdRoute,
   AuthedPlacementsNewRoute: AuthedPlacementsNewRoute,
   AuthedRequestsNewRoute: AuthedRequestsNewRoute,
+  AuthedReviewsReviewIdRoute: AuthedReviewsReviewIdRoute,
   AuthedReviewsNewRoute: AuthedReviewsNewRoute,
   AuthedApplicationsIndexRoute: AuthedApplicationsIndexRoute,
   AuthedApprenticesIndexRoute: AuthedApprenticesIndexRoute,

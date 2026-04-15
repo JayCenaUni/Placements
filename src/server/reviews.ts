@@ -47,6 +47,8 @@ export const listReviews = createServerFn({ method: "GET" })
 
     if (data.role === "apprentice") {
       conditions = eq(review.apprenticeId, data.userId);
+    } else if (data.role === "placement_manager") {
+      conditions = eq(placement.placementManagerId, data.userId);
     }
 
     const results = await db
@@ -111,6 +113,58 @@ export const listReviews = createServerFn({ method: "GET" })
       apprenticeName: r.apprenticeName,
       competencies: competencyByReview.get(r.review.id) ?? [],
     }));
+  });
+
+/**
+ * Fetches one review with competency details, enforcing role-based visibility.
+ *
+ * - Apprentices can only view their own reviews.
+ * - Apprentice managers and placement managers can view any review.
+ */
+export const getReviewById = createServerFn({ method: "GET" })
+  .inputValidator((input: { reviewId: string; userId: string; role: string }) => input)
+  .handler(async ({ data }) => {
+    let conditions = eq(review.id, data.reviewId);
+    if (data.role === "apprentice") {
+      conditions = and(eq(review.id, data.reviewId), eq(review.apprenticeId, data.userId))!;
+    } else if (data.role === "placement_manager") {
+      conditions = and(eq(review.id, data.reviewId), eq(placement.placementManagerId, data.userId))!;
+    }
+
+    const result = await db
+      .select({
+        review: review,
+        placementTitle: placement.title,
+        placementDepartment: placement.department,
+        apprenticeName: user.name,
+      })
+      .from(review)
+      .innerJoin(placement, eq(review.placementId, placement.id))
+      .innerJoin(user, eq(review.apprenticeId, user.id))
+      .where(conditions)
+      .limit(1);
+
+    if (result.length === 0) return null;
+
+    const competencyRatings = await db
+      .select({
+        competencyId: competency.id,
+        competencyName: competency.name,
+        competencyCategory: competency.category,
+        achievement: reviewCompetency.achievement,
+      })
+      .from(reviewCompetency)
+      .innerJoin(competency, eq(reviewCompetency.competencyId, competency.id))
+      .where(eq(reviewCompetency.reviewId, data.reviewId))
+      .orderBy(competency.category, competency.name);
+
+    return {
+      ...result[0].review,
+      placementTitle: result[0].placementTitle,
+      placementDepartment: result[0].placementDepartment,
+      apprenticeName: result[0].apprenticeName,
+      competencies: competencyRatings,
+    };
   });
 
 /**
