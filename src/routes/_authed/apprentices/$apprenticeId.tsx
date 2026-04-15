@@ -1,3 +1,29 @@
+/**
+ * @file Apprentice detail page at `/apprentices/$apprenticeId`.
+ *
+ * @description
+ * Comprehensive view of a single apprentice, used by managers to understand
+ * an apprentice's current status and history. The page shows:
+ *
+ * - **Profile section**: Department, cohort, phone, bio, skills badges.
+ * - **Competencies section**: Achieved competencies grouped by category
+ *   (behavioural, technical) with coloured badges.
+ * - **Current placement**: The placement they're assigned to (from
+ *   `apprenticeProfile.currentPlacementId`) with the placement manager's name.
+ * - **Desired next placement**: Pending applications shown as "where they
+ *   want to go next" — key information for apprentice managers planning
+ *   rotations.
+ * - **Placement history timeline**: A vertical timeline of all approved
+ *   placements, most recent first. The current placement is highlighted
+ *   with a "Current" badge.
+ *
+ * @data-loading
+ * `getApprentice` aggregates data from user, apprenticeProfile, placement,
+ * application (approved and pending), and competency tables in a single
+ * server function call.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §8 for the data loading flow.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Card,

@@ -1,3 +1,26 @@
+/**
+ * @file Registration page — unauthenticated route at `/register`.
+ *
+ * @description
+ * Renders a centered card with fields for name, email, password, and role
+ * selection. On submission, calls the Better Auth client SDK's `signUp.email()`
+ * which POSTs to `/api/auth/sign-up/email`. The `role` field is sent as part
+ * of the signup payload because it's configured as an `additionalField` with
+ * `input: true` in the Better Auth config (`lib/auth.ts`).
+ *
+ * @role-selection
+ * The role dropdown offers all three system roles:
+ * - **Apprentice** — Default; can browse and apply to placements.
+ * - **Apprentice Manager** — Oversees apprentices, reviews applications.
+ * - **Placement Manager** — Creates/manages placement listings.
+ *
+ * The selected role is stored on the `user.role` column and determines what
+ * the user sees throughout the application (sidebar items, dashboard content,
+ * page access).
+ *
+ * @see `docs/uml/sequence-diagrams.md` §1 for the registration sequence.
+ * @see `docs/uml/activity-diagram.md` §5 for the authentication activity flow.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { signUp } from "@/lib/auth-client";

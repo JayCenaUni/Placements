@@ -1,3 +1,32 @@
+/**
+ * @file Placements listing page at `/placements`.
+ *
+ * @description
+ * Displays a grid of placement cards that all roles can browse. The page
+ * adapts based on the user's role:
+ *
+ * - **Apprentices** get a sort toggle between "Date" (chronological) and
+ *   "Competency Gaps" (sorted by how many unachieved competencies each
+ *   placement would provide). The gap sort uses `listPlacementsWithGaps`
+ *   from `server/competencies.ts`.
+ *
+ * - **Placement Managers** see a "New Placement" button to create listings.
+ *
+ * - **Apprentice Managers** see a read-only browsing view.
+ *
+ * @search-params
+ * The sort mode is persisted in the URL search params (`?sort=gaps`),
+ * validated by `validateSearch`, and used as a loader dependency via
+ * `loaderDeps`. This means changing the sort triggers a data reload.
+ *
+ * @competency-gap-sort
+ * When sort=gaps, `listPlacementsWithGaps` computes a `gapCount` per placement
+ * representing how many of the placement's competencies the current apprentice
+ * hasn't achieved. Placements are ordered by gapCount descending, surfacing
+ * the most skill-beneficial placements first.
+ *
+ * @see `server/competencies.ts` for the gap analysis query.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

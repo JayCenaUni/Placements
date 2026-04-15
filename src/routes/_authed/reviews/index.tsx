@@ -1,3 +1,16 @@
+/**
+ * @file Reviews listing page at `/reviews`.
+ *
+ * @description
+ * Displays placement reviews. Apprentices see only their own reviews;
+ * other roles see all reviews in the system. Each review card shows the
+ * placement title, star rating, content excerpt, and the reviewing
+ * apprentice's name.
+ *
+ * Apprentices also get a "Write Review" button linking to `/reviews/new`.
+ *
+ * @see `server/reviews.ts` for the role-scoped listing logic.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

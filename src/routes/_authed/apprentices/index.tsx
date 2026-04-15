@@ -1,3 +1,22 @@
+/**
+ * @file Apprentice directory page at `/apprentices`.
+ *
+ * @description
+ * Displays a card grid of apprentice profiles. The scope depends on role:
+ *
+ * - **Apprentice Managers** see only their assigned apprentices (filtered by
+ *   `managerAssignment` in the server function).
+ * - **Placement Managers** see all apprentice-role users in the system.
+ * - **Apprentices** are redirected to the dashboard (they cannot access this page).
+ *
+ * Each card shows the apprentice's name, email, department, cohort, and
+ * current placement badge. Clicking a card navigates to the apprentice
+ * detail page.
+ *
+ * @see `server/apprentices.ts` for the role-scoped listing query.
+ * @see `docs/uml/use-case-diagram.md` — "View Apprentices" is available to
+ *   apprentice_manager and placement_manager roles.
+ */
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

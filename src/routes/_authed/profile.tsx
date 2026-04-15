@@ -1,3 +1,25 @@
+/**
+ * @file Profile page — view and edit the current user's profile at `/profile`.
+ *
+ * @description
+ * Displays the authenticated user's account information (name, email, role)
+ * and, for apprentices, their extended profile (department, cohort, phone,
+ * skills, bio) and achieved competencies.
+ *
+ * @features
+ * - **Read mode**: Shows profile data in a clean card layout.
+ * - **Edit mode**: Apprentices can toggle into edit mode to update their
+ *   profile fields. The form uses native FormData extraction and calls the
+ *   `updateProfile` server function (which performs an upsert).
+ * - **Competencies section**: For apprentices, shows achieved competencies
+ *   grouped by category (behavioural, technical). This data is loaded via
+ *   `getApprenticeCompetencies` from `server/competencies.ts`.
+ *
+ * @data-loading
+ * The loader fetches the user's profile via `getProfile` and, if the user
+ * is an apprentice, also fetches their competencies. Non-apprentice roles
+ * receive an empty competencies array.
+ */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {

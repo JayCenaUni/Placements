@@ -1,3 +1,18 @@
+/**
+ * @file Placement manager directory page at `/managers`.
+ *
+ * @description
+ * A read-only directory listing all users with the `placement_manager` role,
+ * along with their email and the count of placements they own. This gives
+ * apprentice managers a way to find and contact placement managers.
+ *
+ * @access-control
+ * Restricted to `apprentice_manager` role via `beforeLoad` guard. This page
+ * does not appear in the sidebar for other roles.
+ *
+ * @see `docs/uml/use-case-diagram.md` — "View Manager Assignments" is an
+ *   apprentice_manager-only use case.
+ */
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { listPlacementManagers } from "@/server/managers";

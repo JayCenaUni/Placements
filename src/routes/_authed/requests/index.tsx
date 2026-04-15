@@ -1,3 +1,18 @@
+/**
+ * @file Apprentice requests listing page at `/requests`.
+ *
+ * @description
+ * Shows all apprentice requests created by the current placement manager.
+ * Each card displays the target placement, optional message, status badge,
+ * and creation date. A "New Request" button links to the creation form.
+ *
+ * @access-control
+ * Restricted to `placement_manager` role via `beforeLoad` guard. Other roles
+ * are redirected to the dashboard.
+ *
+ * @see `docs/uml/state-diagrams.md` §3 for request status values.
+ * @see `docs/uml/activity-diagram.md` §3 for the request workflow.
+ */
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -1,3 +1,21 @@
+/**
+ * @file Applications listing page at `/applications`.
+ *
+ * @description
+ * Displays a list of placement applications. The data shown depends on the
+ * user's role (scoping is handled by the `listApplications` server function):
+ *
+ * - **Apprentices** see their own applications with status and date.
+ * - **Apprentice Managers** see applications from their managed apprentices,
+ *   including the applicant's name.
+ * - **Placement Managers** see applications on their placements, including
+ *   the applicant's name.
+ *
+ * Each application card links to the detail page for review/action.
+ *
+ * @see `server/applications.ts` for the role-scoped query logic.
+ * @see `docs/uml/state-diagrams.md` §2 for application status values.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

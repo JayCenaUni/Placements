@@ -1,8 +1,37 @@
+/**
+ * @file Server functions for placement reviews.
+ *
+ * @description
+ * Handles listing, eligibility checking, and creation of placement reviews.
+ * Reviews are feedback submitted by apprentices about placements they have
+ * completed (i.e. placements where they had an approved application). Each
+ * apprentice can review a given placement only once.
+ *
+ * @business-rules
+ * - Only apprentices can create reviews (enforced by the `beforeLoad` guard
+ *   in `routes/_authed/reviews/new.tsx`).
+ * - An apprentice can only review placements where they have an approved
+ *   application AND have not already submitted a review. The eligible set is
+ *   computed by `getReviewablePlacements`.
+ * - Duplicate review prevention is enforced in `createReview` with a DB check.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §9 for the review submission flow.
+ * @see `docs/uml/activity-diagram.md` §2 for the review workflow.
+ */
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
 import { review, placement, user, application } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
+/**
+ * Lists reviews, optionally scoped by role.
+ *
+ * - Apprentices see only their own reviews.
+ * - Apprentice managers and placement managers see all reviews (no filter).
+ *
+ * Each review is enriched with the placement title/department and the
+ * reviewing apprentice's name.
+ */
 export const listReviews = createServerFn({ method: "GET" })
   .inputValidator((input: { userId: string; role: string }) => input)
   .handler(async ({ data }) => {
@@ -33,6 +62,16 @@ export const listReviews = createServerFn({ method: "GET" })
     }));
   });
 
+/**
+ * Computes which placements an apprentice is eligible to review.
+ *
+ * The eligible set is: placements with an approved application by this
+ * apprentice, minus placements they have already reviewed. This ensures the
+ * review form's placement dropdown only shows valid options.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §9 — "Reviewable placements
+ *   (approved minus reviewed)".
+ */
 export const getReviewablePlacements = createServerFn({ method: "GET" })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
@@ -60,6 +99,12 @@ export const getReviewablePlacements = createServerFn({ method: "GET" })
     return approvedApps.filter((p) => !reviewedIds.has(p.placementId));
   });
 
+/**
+ * Creates a new review for a placement.
+ *
+ * Enforces the one-review-per-apprentice-per-placement rule with a duplicate
+ * check before insertion. Throws an error if a duplicate is found.
+ */
 export const createReview = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {

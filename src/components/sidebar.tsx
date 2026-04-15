@@ -1,3 +1,38 @@
+/**
+ * @file Role-adaptive navigation sidebar component.
+ *
+ * @description
+ * Renders the application's primary navigation sidebar. The sidebar filters
+ * its navigation items based on the authenticated user's role, so each role
+ * sees only the pages relevant to them. This is the main navigation mechanism
+ * described in the use case diagram (`docs/uml/use-case-diagram.md`).
+ *
+ * @role-based-navigation
+ * Each `NavItem` declares which roles can see it via the `roles` array.
+ * The sidebar filters the list at render time using `navItems.filter(...)`.
+ *
+ * | Page        | Apprentice | Apprentice Manager | Placement Manager |
+ * |-------------|:----------:|:------------------:|:-----------------:|
+ * | Dashboard   | x          | x                  | x                 |
+ * | Placements  | x          | x                  | x                 |
+ * | Applications| x          | x                  | x                 |
+ * | Reviews     | x          | x                  | x                 |
+ * | Apprentices |            | x                  | x                 |
+ * | Managers    |            | x                  |                   |
+ * | Requests    |            |                    | x                 |
+ * | Profile     | x          | x                  | x                 |
+ *
+ * @responsive
+ * On mobile (`md:` breakpoint), the sidebar is hidden off-screen and toggled
+ * via a hamburger menu button. A semi-transparent overlay appears when the
+ * mobile sidebar is open. On desktop it is always visible as a fixed-width
+ * aside.
+ *
+ * @sign-out
+ * The sign-out button calls `signOut()` from the Better Auth client SDK,
+ * which destroys the session server-side and clears the cookie, then navigates
+ * to `/login`.
+ */
 import { Link, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -23,9 +58,11 @@ interface NavItem {
   label: string;
   to: string;
   icon: React.ReactNode;
+  /** Which roles can see this nav item — used for runtime filtering. */
   roles: UserRole[];
 }
 
+/** Navigation items with role-based visibility. */
 const navItems: NavItem[] = [
   {
     label: "Dashboard",

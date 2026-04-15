@@ -1,3 +1,23 @@
+/**
+ * @file Application detail page at `/applications/$applicationId`.
+ *
+ * @description
+ * Shows full detail for a single application: the target placement info,
+ * the applicant's profile and cover message, and an application timeline.
+ *
+ * @review-action
+ * If the authenticated user is an `apprentice_manager` and the application
+ * is in "pending" status, approve/deny buttons are shown. Clicking either
+ * calls `reviewApplication` which:
+ * 1. Updates the application status to "approved" or "denied".
+ * 2. If approved, triggers the **Approval Side Effect** — setting the
+ *    apprentice's `currentPlacementId` to the placement.
+ *
+ * After review, the user is navigated back to the applications list.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §5 for the review flow.
+ * @see `docs/uml/state-diagrams.md` §2 for the approval side effect.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {

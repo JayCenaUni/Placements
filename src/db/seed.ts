@@ -1,3 +1,40 @@
+/**
+ * @file Database seed script — run via `pnpm db:seed`.
+ *
+ * @description
+ * Populates the SQLite database with realistic test data for all three roles.
+ * The script is destructive: it deletes all existing rows before inserting new
+ * data, so it can be run repeatedly during development to reset to a known
+ * state.
+ *
+ * Users are created via Better Auth's `signUpEmail` API (not raw inserts) so
+ * that passwords are properly hashed and session/account records are created
+ * correctly. All test accounts use the password "password123".
+ *
+ * @test-accounts
+ * | Email                 | Role               |
+ * |-----------------------|--------------------|
+ * | alice@example.com     | apprentice         |
+ * | bob@example.com       | apprentice         |
+ * | charlie@example.com   | apprentice         |
+ * | diana@example.com     | apprentice_manager |
+ * | edward@example.com    | placement_manager  |
+ * | fiona@example.com     | placement_manager  |
+ *
+ * @data-relationships
+ * - Diana (apprentice_manager) is assigned to manage all three apprentices.
+ * - Edward and Fiona (placement_managers) each own two placements.
+ * - Alice has an approved application and a current placement assignment.
+ * - Bob and Charlie have pending/denied applications.
+ * - One review exists (from Alice on the full-stack placement).
+ * - One open apprentice request exists (from Fiona for the cloud placement).
+ * - 16 competencies are seeded (8 behavioural, 8 technical) and linked to
+ *   apprentices and placements to demonstrate the competency gap feature.
+ *
+ * @deletion-order
+ * Tables are deleted in reverse dependency order to avoid FK constraint
+ * violations: join tables first, then entities, then auth tables.
+ */
 import { auth } from "../lib/auth";
 import { db } from "./index";
 import {

@@ -1,3 +1,23 @@
+/**
+ * @file Create placement page at `/placements/new`.
+ *
+ * @description
+ * Form page for placement managers to create new placement listings. Access
+ * is restricted to the `placement_manager` role via a `beforeLoad` guard —
+ * other roles are redirected to the dashboard.
+ *
+ * @form-fields
+ * - Title, Description, Department (required)
+ * - Location, Duration, Start/End dates, Capacity (optional)
+ * - Initial status: "draft" (not visible to others) or "open" (accepting
+ *   applications)
+ *
+ * On successful creation, the user is navigated to the new placement's detail
+ * page. The server function validates input via a Zod schema before insertion.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §6 for the create placement flow.
+ * @see `docs/uml/state-diagrams.md` §1 — new placements default to "draft".
+ */
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {

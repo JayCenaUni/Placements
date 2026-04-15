@@ -1,3 +1,22 @@
+/**
+ * @file Server functions for apprentice profiles and directory.
+ *
+ * @description
+ * Provides data access for the apprentice directory (`/apprentices`), individual
+ * apprentice detail pages (`/apprentices/$apprenticeId`), and the user's own
+ * profile page (`/profile`). Also handles profile updates for apprentices.
+ *
+ * @access-control
+ * - `listApprentices` and `getApprentice`: Accessible to apprentice_manager and
+ *   placement_manager roles. Apprentices are redirected away by the route guard.
+ * - Apprentice managers see only their managed apprentices (filtered by
+ *   `managerAssignment`). Placement managers see all apprentice-role users.
+ * - `getProfile` and `updateProfile`: Accessible to the authenticated user
+ *   for their own profile.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §8 for the apprentice detail data flow.
+ * @see `docs/uml/use-case-diagram.md` for role-based access to these features.
+ */
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
 import {
@@ -11,6 +30,16 @@ import {
 } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
+/**
+ * Lists apprentices scoped by the caller's role.
+ *
+ * - **apprentice_manager**: Queries `managerAssignment` to find assigned
+ *   apprentices, then joins profile and current placement data.
+ * - **placement_manager**: Queries all users with role "apprentice", with
+ *   profile and current placement data.
+ *
+ * Returns a flat object per apprentice suitable for card-based rendering.
+ */
 export const listApprentices = createServerFn({ method: "GET" })
   .inputValidator((input: { userId: string; role: string }) => input)
   .handler(async ({ data }) => {
@@ -38,7 +67,7 @@ export const listApprentices = createServerFn({ method: "GET" })
       }));
     }
 
-    // Placement managers can see all apprentices
+    // Placement managers see all apprentice-role users (not filtered by assignment).
     const results = await db
       .select({
         user: user,
@@ -61,9 +90,25 @@ export const listApprentices = createServerFn({ method: "GET" })
     }));
   });
 
+/**
+ * Fetches full detail for a single apprentice.
+ *
+ * Aggregates data from multiple tables to build the apprentice detail view:
+ * - User info and profile (department, cohort, bio, skills, phone)
+ * - Current placement title/department and the placement manager's name
+ *   (resolved via a raw SQL self-join alias "pm" on the user table)
+ * - Achieved competencies (from `apprenticeCompetency` join `competency`)
+ * - Placement history: all approved applications ordered by review date descending
+ * - Pending applications: "desired next placements" for the manager's view
+ *
+ * @see `docs/uml/sequence-diagrams.md` §8 for the data flow.
+ */
 export const getApprentice = createServerFn({ method: "GET" })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
+    // Main query: user + profile + current placement + placement manager name.
+    // The raw SQL `user as pm` alias resolves the placement manager's name
+    // from the same user table without a schema-level self-referential join.
     const result = await db
       .select({
         user: user,
@@ -154,6 +199,12 @@ export const getApprentice = createServerFn({ method: "GET" })
     };
   });
 
+/**
+ * Fetches the current user's profile data (user record + apprentice profile).
+ *
+ * Used by the `/profile` page for all roles. The apprentice profile may be
+ * null if the user hasn't set one up yet or if the user is not an apprentice.
+ */
 export const getProfile = createServerFn({ method: "GET" })
   .inputValidator((userId: string) => userId)
   .handler(async ({ data: userId }) => {
@@ -166,6 +217,13 @@ export const getProfile = createServerFn({ method: "GET" })
     return { user: u, profile: profile ?? null };
   });
 
+/**
+ * Creates or updates the apprentice profile for the given user.
+ *
+ * Uses an upsert pattern: if a profile already exists, it updates the fields;
+ * if not, it inserts a new profile row. This handles the case where an
+ * apprentice edits their profile for the first time.
+ */
 export const updateProfile = createServerFn({ method: "POST" })
   .inputValidator(
     (input: {

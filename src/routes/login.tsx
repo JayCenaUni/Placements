@@ -1,3 +1,23 @@
+/**
+ * @file Login page — unauthenticated route at `/login`.
+ *
+ * @description
+ * Renders a centered card with an email/password form. On submission, calls
+ * the Better Auth client SDK's `signIn.email()` which POSTs to the
+ * `/api/auth/sign-in/email` endpoint. On success, the session cookie is set
+ * by Better Auth and the user is navigated to `/dashboard`.
+ *
+ * @auth-flow
+ * 1. User enters email + password.
+ * 2. `signIn.email()` sends credentials to Better Auth server.
+ * 3. Better Auth validates credentials, creates a session, sets an HTTP-only
+ *    cookie in the response.
+ * 4. Client navigates to `/dashboard`, where the `_authed` layout's
+ *    `beforeLoad` validates the session cookie.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §2 for the login sequence.
+ * @see `docs/uml/activity-diagram.md` §5 for the authentication activity flow.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { signIn } from "@/lib/auth-client";

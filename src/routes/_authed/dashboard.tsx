@@ -1,3 +1,31 @@
+/**
+ * @file Dashboard page — role-specific landing page at `/dashboard`.
+ *
+ * @description
+ * The dashboard is the first page users see after logging in. Its content
+ * varies entirely based on the user's role:
+ *
+ * - **Apprentice**: Shows current placement, application stats/history,
+ *   and a count of open placements to browse.
+ *
+ * - **Apprentice Manager**: Shows the "Apprentice Locations" table — a
+ *   centralised view of where each managed apprentice is currently placed,
+ *   which placement manager oversees them, and where they want to go next
+ *   (their first pending application). Also shows aggregate stats.
+ *
+ * - **Placement Manager**: Shows placement listing stats (total, active),
+ *   application counts, open requests, a list of their placements, and
+ *   recent reviews received on their placements.
+ *
+ * @data-loading
+ * The route's `loader` inspects `context.session.user.role` (provided by the
+ * `_authed` layout's `beforeLoad`) and calls the corresponding server function
+ * from `server/dashboard.ts`. The returned data is typed via Awaited<ReturnType>
+ * utility types to maintain full type safety.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §7 for the apprentice manager dashboard flow.
+ * @see `docs/uml/activity-diagram.md` §4 for the dashboard activity diagram.
+ */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Card,
@@ -30,6 +58,7 @@ export const Route = createFileRoute("/_authed/dashboard")({
     const role = context.session.user.role;
     const userId = context.session.user.id;
 
+    // Dispatch to the role-specific server function.
     if (role === "apprentice") {
       return { role, data: await getApprenticeDashboard({ data: userId }) };
     } else if (role === "apprentice_manager") {
@@ -41,6 +70,10 @@ export const Route = createFileRoute("/_authed/dashboard")({
   component: DashboardPage,
 });
 
+/**
+ * Maps entity status values to Badge component colour variants.
+ * Used across dashboard sub-components to consistently colour-code statuses.
+ */
 const statusVariant: Record<string, "default" | "success" | "warning" | "destructive" | "secondary"> = {
   pending: "warning",
   approved: "success",
@@ -56,6 +89,11 @@ type ApprenticeData = Awaited<ReturnType<typeof getApprenticeDashboard>>;
 type AMData = Awaited<ReturnType<typeof getApprenticeManagerDashboard>>;
 type PMData = Awaited<ReturnType<typeof getPlacementManagerDashboard>>;
 
+/**
+ * Dispatcher component: renders the role-specific dashboard sub-component.
+ * The `role` discriminator and the data shape are coupled — each role's
+ * server function returns a different payload shape.
+ */
 function DashboardPage() {
   const { role, data } = Route.useLoaderData();
 
@@ -160,6 +198,14 @@ function ApprenticeDashboard({ data }: { data: ApprenticeData }) {
   );
 }
 
+/**
+ * Apprentice Manager dashboard — "Apprentice Locations" view.
+ *
+ * Renders a table showing each managed apprentice with their current placement,
+ * the placement's manager, and their desired next placement (first pending
+ * application). This is the primary tool for apprentice managers to track
+ * where their apprentices are and plan rotations.
+ */
 function ApprenticeManagerDashboard({ data }: { data: AMData }) {
   return (
     <div className="space-y-6">

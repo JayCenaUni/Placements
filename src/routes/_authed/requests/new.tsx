@@ -1,3 +1,24 @@
+/**
+ * @file New apprentice request page at `/requests/new`.
+ *
+ * @description
+ * Form page for placement managers to create apprentice requests — outbound
+ * requests for apprentices to fill a specific placement. This is the inverse
+ * of the application flow (where apprentices initiate contact).
+ *
+ * @access-control
+ * Restricted to `placement_manager` role via `beforeLoad` guard.
+ *
+ * @form
+ * - Placement selection dropdown (populated from the manager's placements
+ *   via `getManagerPlacements`)
+ * - Optional message describing what kind of apprentice they're looking for
+ *
+ * On submission, `createRequest` creates a request with "open" status.
+ *
+ * @see `docs/uml/activity-diagram.md` §3 for the request workflow.
+ * @see `docs/uml/state-diagrams.md` §3 — requests start as "open".
+ */
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {

@@ -1,3 +1,39 @@
+/**
+ * @file Placement detail page at `/placements/$placementId`.
+ *
+ * @description
+ * Shows comprehensive detail for a single placement. The page adapts
+ * significantly based on the viewer's role and relationship to the placement:
+ *
+ * - **All roles**: See the placement description, details sidebar (location,
+ *   duration, dates, capacity), and manager contact info.
+ *
+ * - **Apprentices**: See a competency comparison section showing which
+ *   competencies the placement develops, visually distinguishing achieved
+ *   (green) vs gap (yellow) competencies. If the placement is "open" and
+ *   the apprentice hasn't applied, an application form is shown.
+ *
+ * - **Placement owner** (the placement_manager who created it): Sees the
+ *   applications list with links to review each one, and a "Manage" card
+ *   to update the placement status.
+ *
+ * @data-loading
+ * The loader fetches the placement (with applications and competencies) via
+ * `getPlacement`, and for apprentices, also fetches their achieved competencies
+ * via `getApprenticeCompetencies` to power the gap/achieved visual comparison.
+ *
+ * @application-flow
+ * The `handleApply` function calls `applyToPlacement` which creates a new
+ * application with "pending" status. The UI prevents duplicate applications
+ * by checking `hasApplied` (derived from the placement's applications list).
+ *
+ * @status-management
+ * The placement owner can change the status via a dropdown (draft/open/filled/
+ * closed). This calls `updatePlacement` and refreshes the page.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §4 for the application submission flow.
+ * @see `docs/uml/state-diagrams.md` §1 for placement status transitions.
+ */
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {

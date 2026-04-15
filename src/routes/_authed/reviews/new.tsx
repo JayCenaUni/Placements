@@ -1,3 +1,28 @@
+/**
+ * @file New review page at `/reviews/new`.
+ *
+ * @description
+ * Form page for apprentices to submit reviews of completed placements. Access
+ * is restricted to the `apprentice` role via a `beforeLoad` guard.
+ *
+ * @eligibility
+ * The loader calls `getReviewablePlacements` which returns placements where
+ * the apprentice has an approved application AND hasn't already submitted a
+ * review. If no placements are eligible, an informational message is shown
+ * instead of the form.
+ *
+ * @form
+ * - Placement selection dropdown (populated from eligible placements)
+ * - Interactive star rating (1–5, with hover preview)
+ * - Optional title
+ * - Required review content
+ *
+ * On submission, `createReview` checks for duplicates server-side before
+ * inserting. Success navigates back to `/reviews`.
+ *
+ * @see `docs/uml/sequence-diagrams.md` §9 for the review submission flow.
+ * @see `docs/uml/activity-diagram.md` §2 for the review workflow.
+ */
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
