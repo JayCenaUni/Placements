@@ -24,6 +24,7 @@ import {
   applyToPlacement,
   updatePlacement,
 } from "@/server/placements";
+import { getApprenticeCompetencies } from "@/server/competencies";
 import {
   Building2,
   MapPin,
@@ -33,13 +34,19 @@ import {
   Mail,
   ArrowLeft,
   Award,
+  CircleCheck,
+  CircleAlert,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/placements/$placementId")({
-  loader: async ({ params }) => {
+  loader: async ({ params, context }) => {
     const placement = await getPlacement({ data: params.placementId });
     if (!placement) throw new Error("Placement not found");
-    return { placement };
+    const achievedCompetencies =
+      context.session.user.role === "apprentice"
+        ? await getApprenticeCompetencies({ data: context.session.user.id })
+        : [];
+    return { placement, achievedCompetencies };
   },
   component: PlacementDetailPage,
 });
@@ -56,8 +63,9 @@ const statusVariant: Record<string, "default" | "success" | "warning" | "destruc
 };
 
 function PlacementDetailPage() {
-  const { placement } = Route.useLoaderData();
+  const { placement, achievedCompetencies } = Route.useLoaderData();
   const { session } = Route.useRouteContext();
+  const achievedIds = new Set(achievedCompetencies.map((c) => c.id));
   const navigate = useNavigate();
   const role = session.user.role;
   const isOwner = placement.placementManagerId === session.user.id;
@@ -130,6 +138,67 @@ function PlacementDetailPage() {
               <p className="whitespace-pre-wrap">{placement.description}</p>
             </CardContent>
           </Card>
+
+          {placement.competencies.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" /> Competencies Developed
+                </CardTitle>
+                <CardDescription>
+                  {isApprentice
+                    ? "Competencies you can develop during this placement. Your achieved competencies are highlighted."
+                    : "Competencies an apprentice can develop during this placement."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {(["behavioural", "technical"] as const).map((cat) => {
+                    const items = placement.competencies.filter((c) => c.category === cat);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={cat}>
+                        <p className="mb-3 text-sm font-semibold capitalize">{cat}</p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {items.map((c) => {
+                            const achieved = achievedIds.has(c.id);
+                            return (
+                              <div
+                                key={c.id}
+                                className={`rounded-lg border p-3 ${achieved ? "border-green-200 bg-green-50" : "border-yellow-200 bg-yellow-50"}`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  {isApprentice && (
+                                    achieved
+                                      ? <CircleCheck className="h-4 w-4 shrink-0 text-green-600" />
+                                      : <CircleAlert className="h-4 w-4 shrink-0 text-yellow-600" />
+                                  )}
+                                  <span className="text-sm font-medium">{c.name}</span>
+                                  {isApprentice && (
+                                    <Badge
+                                      variant={achieved ? "success" : "warning"}
+                                      className="ml-auto text-[10px] px-1.5 py-0"
+                                    >
+                                      {achieved ? "Achieved" : "Gap"}
+                                    </Badge>
+                                  )}
+                                </div>
+                                {c.description && (
+                                  <p className={`mt-1.5 text-xs ${achieved ? "text-green-700" : "text-yellow-700"}`}>
+                                    {c.description}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {isApprentice && placement.status === "open" && (
             <Card>
@@ -246,36 +315,6 @@ function PlacementDetailPage() {
               </div>
             </CardContent>
           </Card>
-
-          {placement.competencies.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Award className="h-4 w-4" /> Competencies Developed
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {(["behavioural", "technical"] as const).map((cat) => {
-                    const items = placement.competencies.filter((c) => c.category === cat);
-                    if (items.length === 0) return null;
-                    return (
-                      <div key={cat}>
-                        <p className="mb-1.5 text-xs font-medium capitalize text-muted-foreground">{cat}</p>
-                        <div className="flex flex-wrap gap-1">
-                          {items.map((c) => (
-                            <Badge key={c.id} variant={cat === "technical" ? "default" : "secondary"}>
-                              {c.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <Card>
             <CardHeader>
