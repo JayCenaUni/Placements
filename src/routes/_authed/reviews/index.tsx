@@ -116,7 +116,7 @@ function ReviewsListPage() {
                 </div>
                 <p className="mt-2 text-[11px] text-muted-foreground">
                   by {r.apprenticeName} &middot;{" "}
-                  {new Date(r.createdAt).toLocaleDateString()}
+                  {new Date(r.createdAt).toLocaleDateString("en-GB")}
                 </p>
                 <Button asChild variant="ghost" size="sm" className="mt-1 h-7 px-0 text-xs">
                   <Link to="/reviews/$reviewId" params={{ reviewId: r.id }}>

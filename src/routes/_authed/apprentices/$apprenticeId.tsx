@@ -218,7 +218,7 @@ function ApprenticeDetailPage() {
                       <div>
                         <p className="font-medium">{app.placementTitle}</p>
                         <p className="text-xs text-muted-foreground">
-                          Applied {new Date(app.appliedAt).toLocaleDateString()}
+                          Applied {new Date(app.appliedAt).toLocaleDateString("en-GB")}
                         </p>
                       </div>
                     </div>
@@ -261,7 +261,7 @@ function ApprenticeDetailPage() {
                     <p className="text-sm text-muted-foreground">{entry.department}</p>
                     {entry.approvedAt && (
                       <p className="text-xs text-muted-foreground">
-                        Approved {new Date(entry.approvedAt).toLocaleDateString()}
+                        Approved {new Date(entry.approvedAt).toLocaleDateString("en-GB")}
                       </p>
                     )}
                     {i === 0 && apprentice.currentPlacementTitle === entry.placementTitle && (

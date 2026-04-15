@@ -86,7 +86,7 @@ function ApplicationsListPage() {
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground">
-                      Applied {new Date(app.appliedAt).toLocaleDateString()}
+                      Applied {new Date(app.appliedAt).toLocaleDateString("en-GB")}
                     </p>
                   </div>
                   <Badge variant={statusVariant[app.status] ?? "default"}>

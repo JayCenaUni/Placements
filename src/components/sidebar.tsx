@@ -46,11 +46,14 @@ import {
   LogOut,
   Menu,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useState } from "react";
 import { signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/hooks/use-theme";
 
 type UserRole = "apprentice" | "apprentice_manager" | "placement_manager";
 
@@ -128,6 +131,7 @@ interface SidebarProps {
 export function Sidebar({ userName, userRole }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
+  const { theme, toggleTheme } = useTheme();
 
   const filteredItems = navItems.filter((item) => item.roles.includes(userRole));
 
@@ -174,6 +178,14 @@ export function Sidebar({ userName, userRole }: SidebarProps) {
         <Button
           variant="ghost"
           className="w-full justify-start gap-2"
+          onClick={toggleTheme}
+        >
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </Button>
+        <Button
+          variant="ghost"
+          className="mt-1 w-full justify-start gap-2"
           onClick={handleSignOut}
         >
           <LogOut className="h-4 w-4" />

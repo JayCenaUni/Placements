@@ -182,7 +182,7 @@ function ApprenticeDashboard({ data }: { data: ApprenticeData }) {
                         {app.placementDepartment}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Applied {new Date(app.appliedAt).toLocaleDateString()}
+                        Applied {new Date(app.appliedAt).toLocaleDateString("en-GB")}
                       </p>
                     </div>
                     <Badge variant={statusVariant[app.status] ?? "default"}>

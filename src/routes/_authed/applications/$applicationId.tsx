@@ -207,14 +207,14 @@ function ApplicationDetailPage() {
               <div>
                 <p className="font-medium">Applied</p>
                 <p className="text-muted-foreground">
-                  {new Date(application.appliedAt).toLocaleString()}
+                  {new Date(application.appliedAt).toLocaleString("en-GB")}
                 </p>
               </div>
               {application.reviewedAt && (
                 <div>
                   <p className="font-medium">Reviewed</p>
                   <p className="text-muted-foreground">
-                    {new Date(application.reviewedAt).toLocaleString()}
+                    {new Date(application.reviewedAt).toLocaleString("en-GB")}
                   </p>
                 </div>
               )}

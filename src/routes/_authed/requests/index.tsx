@@ -84,7 +84,7 @@ function RequestsListPage() {
                     </p>
                   )}
                   <p className="text-xs text-muted-foreground">
-                    Created {new Date(r.createdAt).toLocaleDateString()}
+                    Created {new Date(r.createdAt).toLocaleDateString("en-GB")}
                   </p>
                 </div>
                 <Badge variant={statusVariant[r.status] ?? "default"}>

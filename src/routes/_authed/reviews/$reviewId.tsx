@@ -60,7 +60,8 @@ function ReviewDetailPage() {
           <CardTitle className="text-lg">{review.placementTitle}</CardTitle>
           <p className="text-xs text-muted-foreground">{review.placementDepartment}</p>
           <p className="text-[11px] text-muted-foreground">
-            by {review.apprenticeName} &middot; {new Date(review.createdAt).toLocaleDateString()}
+            by {review.apprenticeName} &middot;{" "}
+            {new Date(review.createdAt).toLocaleDateString("en-GB")}
           </p>
         </CardHeader>
         <CardContent className="pt-0">
