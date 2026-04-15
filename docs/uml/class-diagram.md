@@ -136,17 +136,42 @@ classDiagram
         +DateTime createdAt
     }
 
+    class Competency {
+        +String id PK
+        +String name
+        +String category : behavioural | technical
+        +String description
+    }
+
+    class ApprenticeCompetency {
+        +String id PK
+        +String apprenticeId FK
+        +String competencyId FK
+        +DateTime achievedAt
+    }
+
+    class PlacementCompetency {
+        +String id PK
+        +String placementId FK
+        +String competencyId FK
+    }
+
     User "1" --> "0..1" ApprenticeProfile : has profile
     User "1" --> "*" Placement : manages
     User "1" --> "*" Application : submits
     User "1" --> "*" Review : writes
     User "1" --> "*" ManagerAssignment : assigned as manager
     User "1" --> "*" ApprenticeRequest : creates
+    User "1" --> "*" ApprenticeCompetency : achieves
 
     Placement "1" --> "*" Application : receives
     Placement "1" --> "*" Review : has
     Placement "1" --> "*" ApprenticeRequest : target of
     Placement "1" --> "*" ApprenticeProfile : current for
+    Placement "1" --> "*" PlacementCompetency : develops
+
+    Competency "1" --> "*" ApprenticeCompetency : achieved by
+    Competency "1" --> "*" PlacementCompetency : developed in
 
     Application "*" --> "0..1" User : reviewedBy
     ManagerAssignment "*" --> "1" User : apprentice
@@ -170,6 +195,10 @@ classDiagram
 | Placement → Review | 1 to many | Each placement receives reviews (cascade delete) |
 | Placement → ApprenticeRequest | 1 to many | Placement managers request apprentices for placements |
 | Placement → ApprenticeProfile | 1 to many | Tracks which apprentices are currently on this placement |
+| Placement → PlacementCompetency | 1 to many | Each placement develops zero or more competencies (cascade delete) |
+| User → ApprenticeCompetency | 1 to many | Apprentices achieve competencies over time (cascade delete) |
+| Competency → ApprenticeCompetency | 1 to many | Each competency can be achieved by many apprentices (cascade delete) |
+| Competency → PlacementCompetency | 1 to many | Each competency can be developed by many placements (cascade delete) |
 
 ## Enumeration Values
 
@@ -179,3 +208,4 @@ classDiagram
 | `Placement.status` | `draft`, `open`, `filled`, `closed` |
 | `Application.status` | `pending`, `approved`, `denied`, `withdrawn` |
 | `ApprenticeRequest.status` | `open`, `accepted`, `declined` |
+| `Competency.category` | `behavioural`, `technical` |

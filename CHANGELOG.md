@@ -8,6 +8,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Competency framework** — Introduced a data-driven competency model to support placement mapping. Three new database tables: `competency` (master list of behavioural and technical competencies), `apprentice_competency` (tracks which competencies an apprentice has achieved), and `placement_competency` (tracks which competencies a placement develops).
+- **Seed competencies** — 16 example engineering competencies seeded across two categories: 8 behavioural (Communication, Problem Solving, Teamwork, Time Management, Adaptability, Leadership, Critical Thinking, Professional Development) and 8 technical (Software Development, Version Control, Testing & QA, Cloud Infrastructure, Data Analysis, Networking, Security Fundamentals, System Design). Seed data also links competencies to existing apprentices and placements.
+- **`src/server/competencies.ts`** — New server module with four functions: `listCompetencies`, `getApprenticeCompetencies`, `getPlacementCompetencies`, and `listPlacementsWithGaps` (ranks placements by the number of competencies the placement offers that the apprentice has not yet achieved).
+- **Competencies on apprentice detail page** — New "Competencies" card on `/apprentices/$apprenticeId` showing achieved competencies grouped by Behavioural and Technical with colour-coded badges.
+- **Competencies on own profile page** — Read-only "Competencies" card on `/profile` for apprentice users showing their achieved competencies.
+- **Competencies Developed on placement detail page** — Full-width card on `/placements/$placementId` (moved from sidebar to main content area) showing each competency the placement offers with its description. For apprentice users, each competency is highlighted as either "Achieved" (green, checkmark) or "Gap" (yellow, alert icon) based on their profile.
+- **Placement sort by competency gaps** — Apprentices see a Date / Competency Gaps toggle on `/placements`. Selecting "Competency Gaps" re-orders placements by the number of missing competencies (most gaps first), with a badge on each card showing the gap count.
+- `getApprentice` server function now returns the apprentice's achieved competencies alongside existing profile data.
+- `getPlacement` server function now returns the placement's associated competencies alongside existing detail data.
+- Drizzle migration `0001_easy_virginia_dare.sql` for the three new competency tables.
+- New UML class diagram entities: `Competency`, `ApprenticeCompetency`, `PlacementCompetency` with relationships.
+- New UML sequence diagrams: **Apprentice Views Placement with Competencies** and **Apprentice Browses Placements by Competency Gaps**.
+- New UML activity diagram: **Competency-Based Placement Browsing** flow.
+- Updated UML use-case, component, and enumeration documentation for the competency feature.
+
 ### Changed
 
 - **UI component library → shadcn/ui** — Replaced hand-rolled UI primitives with official shadcn/ui components backed by Radix UI. This gives proper accessible behaviour (e.g. `asChild` via `@radix-ui/react-slot` on Button, Radix Label primitive, fully styled Radix Select with portal-rendered dropdown). A `components.json` config has been added so future components can be installed with `npx shadcn@latest add <name>`.

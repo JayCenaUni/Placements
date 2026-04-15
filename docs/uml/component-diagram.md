@@ -75,9 +75,10 @@ graph TB
 | Module | Functions |
 |---|---|
 | `dashboard.ts` | getApprenticeDashboard, getApprenticeManagerDashboard (apprentice locations + desired placements), getPlacementManagerDashboard |
-| `placements.ts` | listPlacements, getPlacement, createPlacement, updatePlacement, applyToPlacement |
+| `placements.ts` | listPlacements, getPlacement (includes placement competencies), createPlacement, updatePlacement, applyToPlacement |
 | `applications.ts` | listApplications, getApplication, reviewApplication |
 | `reviews.ts` | listReviews, getReviewablePlacements, createReview |
-| `apprentices.ts` | listApprentices, getApprentice, getProfile, updateProfile |
+| `apprentices.ts` | listApprentices, getApprentice (includes achieved competencies), getProfile, updateProfile |
+| `competencies.ts` | listCompetencies, getApprenticeCompetencies, getPlacementCompetencies, listPlacementsWithGaps |
 | `managers.ts` | listPlacementManagers |
 | `requests.ts` | listRequests, getManagerPlacements, createRequest, updateRequestStatus |

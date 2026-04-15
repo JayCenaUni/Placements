@@ -70,6 +70,7 @@ If you're new to web development, here is what each piece does and why it's here
 │   │   ├── applications.ts
 │   │   ├── reviews.ts
 │   │   ├── apprentices.ts
+│   │   ├── competencies.ts    # Competency queries, gap-based placement ranking
 │   │   ├── managers.ts
 │   │   └── requests.ts
 │   ├── styles/app.css         # Global styles and Tailwind theme tokens
@@ -129,6 +130,9 @@ All tables are defined in `src/db/schema.ts`. The key tables and their relations
 - **review** -- An apprentice reviewing a completed placement (1-5 stars + text).
 - **manager_assignment** -- Links an apprentice manager to the apprentices they oversee.
 - **apprentice_request** -- A placement manager requesting apprentices for a placement.
+- **competency** -- Master list of behavioural and technical competencies (e.g. "Problem Solving", "Version Control").
+- **apprentice_competency** -- Join table tracking which competencies an apprentice has achieved, with a timestamp.
+- **placement_competency** -- Join table tracking which competencies a placement can develop.
 - **session**, **account**, **verification** -- Managed by Better Auth for authentication.
 
 ## Getting started

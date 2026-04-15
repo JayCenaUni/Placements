@@ -244,3 +244,52 @@ sequenceDiagram
         NR-->>A: Review submitted
     end
 ```
+
+## 10. Apprentice Views Placement with Competencies
+
+```mermaid
+sequenceDiagram
+    actor A as Apprentice
+    participant PD as Placement Detail Page
+    participant SF_P as getPlacement()
+    participant SF_C as getApprenticeCompetencies()
+    participant DB as SQLite
+
+    A->>PD: Navigate to /placements/{id}
+    PD->>SF_P: getPlacement(placementId)
+    SF_P->>DB: SELECT placement JOIN manager
+    DB-->>SF_P: Placement details
+    SF_P->>DB: SELECT applications for placement
+    DB-->>SF_P: Applications list
+    SF_P->>DB: SELECT competencies via placement_competency JOIN competency
+    DB-->>SF_P: Placement competencies (with descriptions)
+    SF_P-->>PD: { placement, competencies, applications }
+
+    PD->>SF_C: getApprenticeCompetencies(apprenticeId)
+    SF_C->>DB: SELECT competencies via apprentice_competency JOIN competency
+    DB-->>SF_C: Achieved competencies
+    SF_C-->>PD: Achieved competency IDs
+
+    PD->>PD: Compare placement competencies against achieved set
+    PD-->>A: Render competencies with Achieved/Gap indicators
+```
+
+## 11. Apprentice Browses Placements by Competency Gaps
+
+```mermaid
+sequenceDiagram
+    actor A as Apprentice
+    participant PL as Placements List Page
+    participant SF as listPlacementsWithGaps()
+    participant DB as SQLite
+
+    A->>PL: Click "Competency Gaps" sort toggle
+    PL->>PL: Navigate with search param ?sort=gaps
+    PL->>SF: listPlacementsWithGaps({ apprenticeId })
+    SF->>DB: Subquery: SELECT competencyId FROM apprentice_competency WHERE apprenticeId
+    DB-->>SF: Achieved competency IDs
+    SF->>DB: SELECT placements LEFT JOIN placement_competency, count gaps not in achieved set, ORDER BY gap_count DESC
+    DB-->>SF: Placements with gap counts
+    SF-->>PL: Placement list with gapCount per placement
+    PL-->>A: Render placement cards sorted by gaps (highest first) with gap badges
+```

@@ -164,3 +164,42 @@ flowchart TD
     ClearSession --> ShowLogin
     Logout -->|No| UseApp
 ```
+
+## 6. Competency-Based Placement Browsing
+
+The workflow for an apprentice using competencies to find the most beneficial placement.
+
+```mermaid
+flowchart TD
+    Start([Apprentice navigates to Placements]) --> LoadDefault[Load placements sorted by date]
+
+    LoadDefault --> RenderList[Render placement cards]
+    RenderList --> SortChoice{Select sort mode}
+
+    SortChoice -->|Date| LoadDefault
+    SortChoice -->|Competency Gaps| FetchGaps
+
+    subgraph GapCalc ["Server: listPlacementsWithGaps"]
+        FetchGaps[Fetch apprentice achieved competencies]
+        FetchGaps --> FetchPlacementComps[Fetch all placement competencies]
+        FetchPlacementComps --> CalcGaps[For each placement: count competencies not yet achieved]
+        CalcGaps --> SortByGaps[Sort placements by gap count descending]
+    end
+
+    SortByGaps --> RenderGaps[Render placement cards with gap badges]
+
+    RenderGaps --> DrillDown{View placement detail?}
+    DrillDown -->|No| SortChoice
+    DrillDown -->|Yes| LoadDetail
+
+    subgraph PlacementDetail ["Placement Detail Page"]
+        LoadDetail[Load placement + competencies]
+        LoadDetail --> LoadAchieved[Load apprentice achieved competencies]
+        LoadAchieved --> Compare[Compare: mark each as Achieved or Gap]
+        Compare --> RenderDetail[Render competency cards with descriptions and status]
+    end
+
+    RenderDetail --> ApplyDecision{Apply to placement?}
+    ApplyDecision -->|Yes| SubmitApp([Submit application])
+    ApplyDecision -->|No| BackToList([Return to placement list])
+```
