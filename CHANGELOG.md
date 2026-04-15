@@ -24,6 +24,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - New UML sequence diagrams: **Apprentice Views Placement with Competencies** and **Apprentice Browses Placements by Competency Gaps**.
 - New UML activity diagram: **Competency-Based Placement Browsing** flow.
 - Updated UML use-case, component, and enumeration documentation for the competency feature.
+- **Dark mode support** — Added a persisted light/dark theme system with a sidebar toggle, `useTheme` hook, and root-level pre-hydration script to apply the saved/system theme before UI render.
+- **Review detail route** — Added `/reviews/$reviewId` for drill-down review viewing with per-competency achievement details.
+- **Review competency matrix** — Added Drizzle migration `0002_competency_review_matrix.sql` and new `review_competency` table to store achievement per competency (`not_achieved`, `partially_achieved`, `fully_achieved`).
+- **Expanded seed coverage** — Added additional seed data to improve review/competency scenarios in local development.
 
 ### Changed
 
@@ -38,6 +42,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - **Desired Next Placement** card listing any pending applications the apprentice has submitted.
   - **Placement History** timeline built from approved applications, displayed as a vertical timeline with the most recent placement first and a "Current" badge on the active one.
 - **Apprentice List Page** — Replaced the "Unplaced" warning badge with the placement title or a neutral "No placement assigned" label.
+- **Reviews domain redesign** — Review creation and listing now revolve around competency outcomes rather than free-text/star feedback. Apprentices must rate every competency offered by the selected placement.
+- **Review visibility rules** — Placement managers now only see reviews for placements they own; apprentice managers continue to see all reviews; apprentices see only their own.
+- **Dashboard/review cards linking** — Recent item cards now consistently route using canonical entity IDs in params (e.g. application detail links keyed by `applicationId`).
 
 ### Added
 
@@ -62,6 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - "Placed / Unplaced" badges throughout the apprentice manager views.
 - Pending applications side panel from the manager dashboard (pending application count remains in the KPI row and links through to the full applications page).
 - Hand-written `Button`, `Label`, and `Select` components (replaced by shadcn/ui versions).
+- Legacy review fields tied to the old text/rating model (replaced by competency achievement entries).
 
 ---
 

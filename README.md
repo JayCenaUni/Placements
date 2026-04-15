@@ -7,10 +7,12 @@ An internal web application for managing apprenticeship placements within a larg
 Apprentices in the organisation rotate through different teams on structured placements. This tool replaces what would otherwise be a manual, spreadsheet-driven process:
 
 - **Apprentices** browse open placement listings, apply with a cover message, track the status of their applications, and leave reviews on completed placements.
+  Reviews are competency-based, so apprentices record whether each placement competency was not achieved, partially achieved, or fully achieved.
 - **Apprentice Managers** oversee a group of apprentices. They see a dashboard of who is placed where, approve or deny applications, and read placement reviews.
 - **Placement Managers** own placement listings. They create and manage those listings, request specific apprentices, and view applications and reviews for their placements.
 
 Every user logs in with an email and password. What they see in the sidebar and on each page is determined by their role.
+The interface also supports light and dark mode with a theme toggle in the sidebar, persisted per browser.
 
 ## Tech stack
 
@@ -127,7 +129,8 @@ All tables are defined in `src/db/schema.ts`. The key tables and their relations
 - **apprentice_profile** -- Extended profile info for apprentices (skills, bio, department). One-to-one with user.
 - **placement** -- A placement listing created by a placement manager.
 - **application** -- An apprentice applying to a placement. Status flows: `pending` -> `approved` / `denied`.
-- **review** -- An apprentice reviewing a completed placement (1-5 stars + text).
+- **review** -- Core review record linking an apprentice to a completed placement.
+- **review_competency** -- Per-competency achievement ratings for a review (`not_achieved`, `partially_achieved`, `fully_achieved`).
 - **manager_assignment** -- Links an apprentice manager to the apprentices they oversee.
 - **apprentice_request** -- A placement manager requesting apprentices for a placement.
 - **competency** -- Master list of behavioural and technical competencies (e.g. "Problem Solving", "Version Control").
