@@ -249,12 +249,32 @@ async function seed() {
     .where(eq(apprenticeProfile.userId, apprentice1.user.id));
 
   console.log("Creating reviews...");
-  const reviewId = crypto.randomUUID();
+  const reviewIds = {
+    r1: crypto.randomUUID(),
+    r2: crypto.randomUUID(),
+    r3: crypto.randomUUID(),
+    r4: crypto.randomUUID(),
+  };
   await db.insert(review).values([
     {
-      id: reviewId,
+      id: reviewIds.r1,
       apprenticeId: apprentice1.user.id,
       placementId: placementIds.p1,
+    },
+    {
+      id: reviewIds.r2,
+      apprenticeId: apprentice2.user.id,
+      placementId: placementIds.p2,
+    },
+    {
+      id: reviewIds.r3,
+      apprenticeId: apprentice1.user.id,
+      placementId: placementIds.p3,
+    },
+    {
+      id: reviewIds.r4,
+      apprenticeId: apprentice3.user.id,
+      placementId: placementIds.p4,
     },
   ]);
 
@@ -356,12 +376,34 @@ async function seed() {
   ]);
 
   await db.insert(reviewCompetency).values([
-    { reviewId, competencyId: compIds.softwareDev, achievement: "fully_achieved" },
-    { reviewId, competencyId: compIds.versionControl, achievement: "fully_achieved" },
-    { reviewId, competencyId: compIds.testingQA, achievement: "partially_achieved" },
-    { reviewId, competencyId: compIds.teamwork, achievement: "fully_achieved" },
-    { reviewId, competencyId: compIds.problemSolving, achievement: "partially_achieved" },
-    { reviewId, competencyId: compIds.systemDesign, achievement: "not_achieved" },
+    // Review: Alice on Full-Stack Web Developer (p1)
+    { reviewId: reviewIds.r1, competencyId: compIds.softwareDev, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r1, competencyId: compIds.versionControl, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r1, competencyId: compIds.testingQA, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r1, competencyId: compIds.teamwork, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r1, competencyId: compIds.problemSolving, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r1, competencyId: compIds.systemDesign, achievement: "not_achieved" },
+
+    // Review: Bob on Data Engineering Placement (p2)
+    { reviewId: reviewIds.r2, competencyId: compIds.dataAnalysis, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r2, competencyId: compIds.softwareDev, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r2, competencyId: compIds.criticalThinking, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r2, competencyId: compIds.problemSolving, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r2, competencyId: compIds.systemDesign, achievement: "not_achieved" },
+
+    // Review: Alice on Cloud Infrastructure Apprentice (p3)
+    { reviewId: reviewIds.r3, competencyId: compIds.cloudInfra, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r3, competencyId: compIds.networking, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r3, competencyId: compIds.versionControl, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r3, competencyId: compIds.adaptability, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r3, competencyId: compIds.securityFundamentals, achievement: "not_achieved" },
+
+    // Review: Charlie on Security Operations Analyst (p4)
+    { reviewId: reviewIds.r4, competencyId: compIds.securityFundamentals, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r4, competencyId: compIds.networking, achievement: "fully_achieved" },
+    { reviewId: reviewIds.r4, competencyId: compIds.criticalThinking, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r4, competencyId: compIds.communication, achievement: "partially_achieved" },
+    { reviewId: reviewIds.r4, competencyId: compIds.leadership, achievement: "not_achieved" },
   ]);
 
   console.log("Seed complete!");
