@@ -20,7 +20,15 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
-import { review, placement, user, application } from "@/db/schema";
+import {
+  review,
+  placement,
+  user,
+  application,
+  placementCompetency,
+  competency,
+  reviewCompetency,
+} from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
 /**
@@ -54,11 +62,54 @@ export const listReviews = createServerFn({ method: "GET" })
       .where(conditions)
       .orderBy(sql`${review.createdAt} DESC`);
 
+    const reviewIds = results.map((r) => r.review.id);
+
+    const competencyRatings = reviewIds.length
+      ? await db
+          .select({
+            reviewId: reviewCompetency.reviewId,
+            competencyId: competency.id,
+            competencyName: competency.name,
+            competencyCategory: competency.category,
+            achievement: reviewCompetency.achievement,
+          })
+          .from(reviewCompetency)
+          .innerJoin(competency, eq(reviewCompetency.competencyId, competency.id))
+          .where(
+            sql`${reviewCompetency.reviewId} IN (${sql.join(
+              reviewIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`
+          )
+          .orderBy(competency.category, competency.name)
+      : [];
+
+    const competencyByReview = new Map<
+      string,
+      {
+        competencyId: string;
+        competencyName: string;
+        competencyCategory: "behavioural" | "technical";
+        achievement: "not_achieved" | "partially_achieved" | "fully_achieved";
+      }[]
+    >();
+    for (const item of competencyRatings) {
+      const current = competencyByReview.get(item.reviewId) ?? [];
+      current.push({
+        competencyId: item.competencyId,
+        competencyName: item.competencyName,
+        competencyCategory: item.competencyCategory,
+        achievement: item.achievement,
+      });
+      competencyByReview.set(item.reviewId, current);
+    }
+
     return results.map((r) => ({
       ...r.review,
       placementTitle: r.placementTitle,
       placementDepartment: r.placementDepartment,
       apprenticeName: r.apprenticeName,
+      competencies: competencyByReview.get(r.review.id) ?? [],
     }));
   });
 
@@ -79,6 +130,7 @@ export const getReviewablePlacements = createServerFn({ method: "GET" })
       .select({
         placementId: application.placementId,
         placementTitle: placement.title,
+        placementDepartment: placement.department,
       })
       .from(application)
       .innerJoin(placement, eq(application.placementId, placement.id))
@@ -95,8 +147,50 @@ export const getReviewablePlacements = createServerFn({ method: "GET" })
       .where(eq(review.apprenticeId, userId));
 
     const reviewedIds = new Set(existingReviews.map((r) => r.placementId));
+    const reviewablePlacements = approvedApps.filter((p) => !reviewedIds.has(p.placementId));
+    const placementIds = reviewablePlacements.map((p) => p.placementId);
 
-    return approvedApps.filter((p) => !reviewedIds.has(p.placementId));
+    const competencies = placementIds.length
+      ? await db
+          .select({
+            placementId: placementCompetency.placementId,
+            competencyId: competency.id,
+            competencyName: competency.name,
+            competencyCategory: competency.category,
+          })
+          .from(placementCompetency)
+          .innerJoin(competency, eq(placementCompetency.competencyId, competency.id))
+          .where(
+            sql`${placementCompetency.placementId} IN (${sql.join(
+              placementIds.map((id) => sql`${id}`),
+              sql`, `
+            )})`
+          )
+          .orderBy(competency.category, competency.name)
+      : [];
+
+    const competenciesByPlacement = new Map<
+      string,
+      {
+        competencyId: string;
+        competencyName: string;
+        competencyCategory: "behavioural" | "technical";
+      }[]
+    >();
+    for (const item of competencies) {
+      const current = competenciesByPlacement.get(item.placementId) ?? [];
+      current.push({
+        competencyId: item.competencyId,
+        competencyName: item.competencyName,
+        competencyCategory: item.competencyCategory,
+      });
+      competenciesByPlacement.set(item.placementId, current);
+    }
+
+    return reviewablePlacements.map((p) => ({
+      ...p,
+      competencies: competenciesByPlacement.get(p.placementId) ?? [],
+    }));
   });
 
 /**
@@ -110,9 +204,10 @@ export const createReview = createServerFn({ method: "POST" })
     (input: {
       apprenticeId: string;
       placementId: string;
-      rating: number;
-      title?: string;
-      content: string;
+      competencyRatings: {
+        competencyId: string;
+        achievement: "not_achieved" | "partially_achieved" | "fully_achieved";
+      }[];
     }) => input
   )
   .handler(async ({ data }) => {
@@ -131,14 +226,38 @@ export const createReview = createServerFn({ method: "POST" })
       throw new Error("You have already reviewed this placement.");
     }
 
+    const offeredCompetencies = await db
+      .select({ competencyId: placementCompetency.competencyId })
+      .from(placementCompetency)
+      .where(eq(placementCompetency.placementId, data.placementId));
+
+    const offeredIds = new Set(offeredCompetencies.map((c) => c.competencyId));
+    if (offeredIds.size === 0) {
+      throw new Error("This placement has no competencies configured to review.");
+    }
+
+    const providedIds = new Set(data.competencyRatings.map((c) => c.competencyId));
+    if (providedIds.size !== offeredIds.size) {
+      throw new Error("Please rate every competency offered by this placement.");
+    }
+    for (const offeredId of offeredIds) {
+      if (!providedIds.has(offeredId)) {
+        throw new Error("Please rate every competency offered by this placement.");
+      }
+    }
+
     const id = crypto.randomUUID();
     await db.insert(review).values({
       id,
       apprenticeId: data.apprenticeId,
       placementId: data.placementId,
-      rating: data.rating,
-      title: data.title ?? null,
-      content: data.content,
     });
+    await db.insert(reviewCompetency).values(
+      data.competencyRatings.map((item) => ({
+        reviewId: id,
+        competencyId: item.competencyId,
+        achievement: item.achievement,
+      }))
+    );
     return { id };
   });

@@ -26,6 +26,7 @@ import {
   placement,
   application,
   review,
+  reviewCompetency,
   managerAssignment,
   apprenticeProfile,
   user,
@@ -259,11 +260,13 @@ export const getPlacementManagerDashboard = createServerFn({ method: "GET" })
     let totalApplications = 0;
     let recentReviews: {
       id: string;
-      rating: number;
-      title: string | null;
-      content: string;
       placementTitle: string;
       apprenticeName: string;
+      achievementSummary: {
+        notAchieved: number;
+        partiallyAchieved: number;
+        fullyAchieved: number;
+      };
     }[] = [];
 
     if (placementIds.length > 0) {
@@ -296,13 +299,47 @@ export const getPlacementManagerDashboard = createServerFn({ method: "GET" })
         .orderBy(sql`${review.createdAt} DESC`)
         .limit(5);
 
+      const reviewIds = reviews.map((r) => r.review.id);
+      const reviewCompetencyRows = reviewIds.length
+        ? await db
+            .select({
+              reviewId: reviewCompetency.reviewId,
+              achievement: reviewCompetency.achievement,
+            })
+            .from(reviewCompetency)
+            .where(
+              sql`${reviewCompetency.reviewId} IN (${sql.join(
+                reviewIds.map((id) => sql`${id}`),
+                sql`, `
+              )})`
+            )
+        : [];
+
+      const summaryByReview = new Map<
+        string,
+        { notAchieved: number; partiallyAchieved: number; fullyAchieved: number }
+      >();
+      for (const row of reviewCompetencyRows) {
+        const current = summaryByReview.get(row.reviewId) ?? {
+          notAchieved: 0,
+          partiallyAchieved: 0,
+          fullyAchieved: 0,
+        };
+        if (row.achievement === "not_achieved") current.notAchieved += 1;
+        if (row.achievement === "partially_achieved") current.partiallyAchieved += 1;
+        if (row.achievement === "fully_achieved") current.fullyAchieved += 1;
+        summaryByReview.set(row.reviewId, current);
+      }
+
       recentReviews = reviews.map((r) => ({
         id: r.review.id,
-        rating: r.review.rating,
-        title: r.review.title,
-        content: r.review.content,
         placementTitle: r.placementTitle,
         apprenticeName: r.apprenticeName,
+        achievementSummary: summaryByReview.get(r.review.id) ?? {
+          notAchieved: 0,
+          partiallyAchieved: 0,
+          fullyAchieved: 0,
+        },
       }));
     }
 

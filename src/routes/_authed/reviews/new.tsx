@@ -33,9 +33,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -44,7 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getReviewablePlacements, createReview } from "@/server/reviews";
-import { Star } from "lucide-react";
+import { ListChecks } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/reviews/new")({
   beforeLoad: ({ context }) => {
@@ -67,27 +65,36 @@ function NewReviewPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
+  const [placementId, setPlacementId] = useState(placements[0]?.placementId ?? "");
+  const [competencyRatings, setCompetencyRatings] = useState<
+    Record<string, "not_achieved" | "partially_achieved" | "fully_achieved">
+  >({});
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (rating === 0) {
-      setError("Please select a rating.");
+    const selectedPlacement = placements.find((p) => p.placementId === placementId);
+    if (!selectedPlacement) return;
+
+    const missingRatings = selectedPlacement.competencies.some(
+      (c) => !competencyRatings[c.competencyId]
+    );
+    if (missingRatings) {
+      setError("Please rate every competency for this placement.");
       return;
     }
+
     setLoading(true);
     setError("");
 
-    const formData = new FormData(e.currentTarget);
     try {
       await createReview({
         data: {
           apprenticeId: session.user.id,
-          placementId: formData.get("placementId") as string,
-          rating,
-          title: (formData.get("title") as string) || undefined,
-          content: formData.get("content") as string,
+          placementId,
+          competencyRatings: selectedPlacement.competencies.map((c) => ({
+            competencyId: c.competencyId,
+            achievement: competencyRatings[c.competencyId],
+          })),
         },
       });
       navigate({ to: "/reviews" });
@@ -104,7 +111,7 @@ function NewReviewPage() {
         <h2 className="text-3xl font-bold">Write a Review</h2>
         <Card>
           <CardContent className="py-12 text-center">
-            <Star className="mx-auto h-12 w-12 text-muted-foreground" />
+            <ListChecks className="mx-auto h-12 w-12 text-muted-foreground" />
             <p className="mt-4 text-lg font-medium">No placements to review</p>
             <p className="text-sm text-muted-foreground">
               You can only review placements you've been approved for and haven't
@@ -124,7 +131,7 @@ function NewReviewPage() {
         <CardHeader>
           <CardTitle>Placement Review</CardTitle>
           <CardDescription>
-            Share your experience to help other apprentices.
+            Review each offered competency as not achieved, partially achieved, or fully achieved.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -137,69 +144,55 @@ function NewReviewPage() {
 
             <div className="space-y-2">
               <Label htmlFor="placementId">Placement</Label>
-              <Select name="placementId" required>
+              <Select
+                value={placementId}
+                onValueChange={(value) => {
+                  setPlacementId(value);
+                  setCompetencyRatings({});
+                }}
+                required
+              >
                 <SelectTrigger id="placementId">
                   <SelectValue placeholder="Select a placement..." />
                 </SelectTrigger>
                 <SelectContent>
                   {placements.map((p) => (
                     <SelectItem key={p.placementId} value={p.placementId}>
-                      {p.placementTitle}
+                      {p.placementTitle} - {p.placementDepartment}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>Rating</Label>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setRating(i)}
-                    onMouseEnter={() => setHoverRating(i)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="rounded p-1 transition-colors hover:bg-accent"
-                    aria-label={`${i} star${i > 1 ? "s" : ""}`}
+            {placements
+              .find((p) => p.placementId === placementId)
+              ?.competencies.map((item) => (
+                <div key={item.competencyId} className="space-y-2">
+                  <Label>{item.competencyName}</Label>
+                  <Select
+                    value={competencyRatings[item.competencyId]}
+                    onValueChange={(value) =>
+                      setCompetencyRatings((current) => ({
+                        ...current,
+                        [item.competencyId]: value as
+                          | "not_achieved"
+                          | "partially_achieved"
+                          | "fully_achieved",
+                      }))
+                    }
                   >
-                    <Star
-                      className={`h-6 w-6 ${
-                        i <= (hoverRating || rating)
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </button>
-                ))}
-                {rating > 0 && (
-                  <span className="ml-2 text-sm text-muted-foreground">
-                    {rating}/5
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="title">Title (optional)</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="Sum up your experience..."
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="content">Review *</Label>
-              <Textarea
-                id="content"
-                name="content"
-                required
-                rows={5}
-                placeholder="Share what you learned, what went well, and any suggestions..."
-              />
-            </div>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select achievement level..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_achieved">Not achieved</SelectItem>
+                      <SelectItem value="partially_achieved">Partially achieved</SelectItem>
+                      <SelectItem value="fully_achieved">Fully achieved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
 
             <div className="flex gap-3 pt-4">
               <Button type="submit" disabled={loading}>

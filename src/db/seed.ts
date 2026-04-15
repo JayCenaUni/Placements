@@ -42,6 +42,7 @@ import {
   placement,
   application,
   review,
+  reviewCompetency,
   managerAssignment,
   apprenticeRequest,
   user,
@@ -57,6 +58,7 @@ async function seed() {
   console.log("Clearing existing data...");
   await db.delete(apprenticeCompetency);
   await db.delete(placementCompetency);
+  await db.delete(reviewCompetency);
   await db.delete(competency);
   await db.delete(review);
   await db.delete(apprenticeRequest);
@@ -247,14 +249,12 @@ async function seed() {
     .where(eq(apprenticeProfile.userId, apprentice1.user.id));
 
   console.log("Creating reviews...");
+  const reviewId = crypto.randomUUID();
   await db.insert(review).values([
     {
+      id: reviewId,
       apprenticeId: apprentice1.user.id,
       placementId: placementIds.p1,
-      rating: 5,
-      title: "Excellent learning experience",
-      content:
-        "The team was incredibly supportive and I learned so much about modern web development. The code reviews were particularly valuable and helped me improve my coding practices significantly.",
     },
   ]);
 
@@ -353,6 +353,15 @@ async function seed() {
     { placementId: placementIds.p4, competencyId: compIds.criticalThinking },
     { placementId: placementIds.p4, competencyId: compIds.communication },
     { placementId: placementIds.p4, competencyId: compIds.leadership },
+  ]);
+
+  await db.insert(reviewCompetency).values([
+    { reviewId, competencyId: compIds.softwareDev, achievement: "fully_achieved" },
+    { reviewId, competencyId: compIds.versionControl, achievement: "fully_achieved" },
+    { reviewId, competencyId: compIds.testingQA, achievement: "partially_achieved" },
+    { reviewId, competencyId: compIds.teamwork, achievement: "fully_achieved" },
+    { reviewId, competencyId: compIds.problemSolving, achievement: "partially_achieved" },
+    { reviewId, competencyId: compIds.systemDesign, achievement: "not_achieved" },
   ]);
 
   console.log("Seed complete!");

@@ -46,7 +46,6 @@ import {
   FileText,
   Users,
   Plus,
-  Star,
   ArrowRight,
   Send,
   MoveRight,
@@ -456,15 +455,27 @@ function PlacementManagerDashboard({ data }: { data: PMData }) {
                   <div key={r.id} className="rounded-md border p-3">
                     <div className="flex items-center justify-between">
                       <p className="font-medium">{r.placementTitle}</p>
-                      <div className="flex items-center gap-1">
-                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                        <span className="text-sm">{r.rating}/5</span>
-                      </div>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">
                       by {r.apprenticeName}
                     </p>
-                    <p className="mt-1 text-sm line-clamp-2">{r.content}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Badge variant="outline" className="border-red-200 bg-red-50 text-red-700">
+                        Not achieved: {r.achievementSummary.notAchieved}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-orange-200 bg-orange-50 text-orange-700"
+                      >
+                        Partially achieved: {r.achievementSummary.partiallyAchieved}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-green-200 bg-green-50 text-green-700"
+                      >
+                        Fully achieved: {r.achievementSummary.fullyAchieved}
+                      </Badge>
+                    </div>
                   </div>
                 ))}
                 <Button variant="ghost" asChild className="w-full">

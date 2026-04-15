@@ -286,10 +286,32 @@ export const review = sqliteTable("review", {
   placementId: text("placement_id")
     .notNull()
     .references(() => placement.id, { onDelete: "cascade" }),
-  rating: integer("rating").notNull(),
-  title: text("title"),
-  content: text("content").notNull(),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+/**
+ * Competency-level achievement recorded as part of a review.
+ *
+ * For each competency offered by the reviewed placement, the apprentice records
+ * one of three outcomes:
+ * - `not_achieved` (red)
+ * - `partially_achieved` (orange)
+ * - `fully_achieved` (green)
+ *
+ * @relationship N:1 → review via reviewId
+ * @relationship N:1 → competency via competencyId
+ */
+export const reviewCompetency = sqliteTable("review_competency", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  reviewId: text("review_id")
+    .notNull()
+    .references(() => review.id, { onDelete: "cascade" }),
+  competencyId: text("competency_id")
+    .notNull()
+    .references(() => competency.id, { onDelete: "cascade" }),
+  achievement: text("achievement", {
+    enum: ["not_achieved", "partially_achieved", "fully_achieved"],
+  }).notNull(),
 });
 
 /**
@@ -419,6 +441,7 @@ export type Placement = typeof placement.$inferSelect;
 export type NewPlacement = typeof placement.$inferInsert;
 export type Application = typeof application.$inferSelect;
 export type Review = typeof review.$inferSelect;
+export type ReviewCompetency = typeof reviewCompetency.$inferSelect;
 export type ManagerAssignment = typeof managerAssignment.$inferSelect;
 export type ApprenticeRequest = typeof apprenticeRequest.$inferSelect;
 export type Competency = typeof competency.$inferSelect;

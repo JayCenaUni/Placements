@@ -14,8 +14,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { listReviews } from "@/server/reviews";
-import { Star, Plus } from "lucide-react";
+import { ListChecks, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/reviews/")({
   loader: async ({ context }) => {
@@ -27,22 +28,26 @@ export const Route = createFileRoute("/_authed/reviews/")({
   component: ReviewsListPage,
 });
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex items-center gap-0.5">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          className={`h-4 w-4 ${
-            i <= rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "text-muted-foreground"
-          }`}
-        />
-      ))}
-    </div>
-  );
-}
+const achievementMeta: Record<
+  "not_achieved" | "partially_achieved" | "fully_achieved",
+  { label: string; className: string; dotClass: string }
+> = {
+  not_achieved: {
+    label: "Not achieved",
+    className: "border-red-200 bg-red-50 text-red-700",
+    dotClass: "bg-red-600",
+  },
+  partially_achieved: {
+    label: "Partially achieved",
+    className: "border-orange-200 bg-orange-50 text-orange-700",
+    dotClass: "bg-orange-500",
+  },
+  fully_achieved: {
+    label: "Fully achieved",
+    className: "border-green-200 bg-green-50 text-green-700",
+    dotClass: "bg-green-600",
+  },
+};
 
 function ReviewsListPage() {
   const { reviews } = Route.useLoaderData();
@@ -70,7 +75,7 @@ function ReviewsListPage() {
       {reviews.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Star className="mx-auto h-12 w-12 text-muted-foreground" />
+            <ListChecks className="mx-auto h-12 w-12 text-muted-foreground" />
             <p className="mt-4 text-lg font-medium">No reviews yet</p>
             <p className="text-sm text-muted-foreground">
               {isApprentice
@@ -86,18 +91,31 @@ function ReviewsListPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">
-                      {r.title || r.placementTitle}
-                    </CardTitle>
+                    <CardTitle className="text-lg">{r.placementTitle}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      {r.placementTitle} &middot; {r.placementDepartment}
+                      {r.placementDepartment}
                     </p>
                   </div>
-                  <StarRating rating={r.rating} />
                 </div>
               </CardHeader>
               <CardContent>
-                <p className="whitespace-pre-wrap text-sm">{r.content}</p>
+                <div className="space-y-2">
+                  {r.competencies.map((item) => {
+                    const meta = achievementMeta[item.achievement];
+                    return (
+                      <div
+                        key={item.competencyId}
+                        className="flex items-center justify-between rounded-md border p-2"
+                      >
+                        <p className="text-sm font-medium">{item.competencyName}</p>
+                        <Badge variant="outline" className={meta.className}>
+                          <span className={`mr-1.5 h-2 w-2 rounded-full ${meta.dotClass}`} />
+                          {meta.label}
+                        </Badge>
+                      </div>
+                    );
+                  })}
+                </div>
                 <p className="mt-3 text-xs text-muted-foreground">
                   by {r.apprenticeName} &middot;{" "}
                   {new Date(r.createdAt).toLocaleDateString()}

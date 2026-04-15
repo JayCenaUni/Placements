@@ -15,6 +15,13 @@
       "when": 1776242516651,
       "tag": "0001_easy_virginia_dare",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776300000000,
+      "tag": "0002_competency_review_matrix",
+      "breakpoints": true
     }
   ]
 }
