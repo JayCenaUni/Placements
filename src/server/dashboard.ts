@@ -62,8 +62,16 @@ export const getApprenticeDashboard = createServerFn({ method: "GET" })
       : null;
 
     const applications = await db
-      .select()
+      .select({
+        id: application.id,
+        status: application.status,
+        appliedAt: application.appliedAt,
+        placementId: application.placementId,
+        placementTitle: placement.title,
+        placementDepartment: placement.department,
+      })
       .from(application)
+      .innerJoin(placement, eq(application.placementId, placement.id))
       .where(eq(application.apprenticeId, userId))
       .orderBy(sql`${application.appliedAt} DESC`)
       .limit(5);

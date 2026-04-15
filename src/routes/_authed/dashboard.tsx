@@ -169,20 +169,27 @@ function ApprenticeDashboard({ data }: { data: ApprenticeData }) {
           ) : (
             <div className="space-y-3">
               {data.recentApplications.map((app) => (
-                <div
+                <Link
                   key={app.id}
-                  className="flex items-center justify-between rounded-md border p-3"
+                  to="/applications/$applicationId"
+                  params={{ applicationId: app.id }}
+                  className="block rounded-md border p-3 transition-colors hover:bg-accent"
                 >
-                  <div>
-                    <p className="font-medium">{app.placementId}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Applied {new Date(app.appliedAt).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{app.placementTitle}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {app.placementDepartment}
+                      </p>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Applied {new Date(app.appliedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge variant={statusVariant[app.status] ?? "default"}>
+                      {app.status}
+                    </Badge>
                   </div>
-                  <Badge variant={statusVariant[app.status] ?? "default"}>
-                    {app.status}
-                  </Badge>
-                </div>
+                </Link>
               ))}
               <Button variant="ghost" asChild className="w-full">
                 <Link to="/applications">
