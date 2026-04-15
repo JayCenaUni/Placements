@@ -10,7 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createRequest, getManagerPlacements } from "@/server/requests";
 
 export const Route = createFileRoute("/_authed/requests/new")({
@@ -83,13 +89,17 @@ function NewRequestPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="placementId">Placement</Label>
-                <Select id="placementId" name="placementId" required>
-                  <option value="">Select a placement...</option>
-                  {placements.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title}
-                    </option>
-                  ))}
+                <Select name="placementId" required>
+                  <SelectTrigger id="placementId">
+                    <SelectValue placeholder="Select a placement..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {placements.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
 

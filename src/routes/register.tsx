@@ -4,7 +4,13 @@ import { signUp } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -110,15 +116,15 @@ function RegisterPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
-              <Select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              >
-                <option value="apprentice">Apprentice</option>
-                <option value="apprentice_manager">Apprentice Manager</option>
-                <option value="placement_manager">Placement Manager</option>
+              <Select value={role} onValueChange={setRole} required>
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="apprentice">Apprentice</SelectItem>
+                  <SelectItem value="apprentice_manager">Apprentice Manager</SelectItem>
+                  <SelectItem value="placement_manager">Placement Manager</SelectItem>
+                </SelectContent>
               </Select>
             </div>
           </CardContent>

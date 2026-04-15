@@ -12,7 +12,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   getPlacement,
   applyToPlacement,
@@ -265,14 +271,16 @@ function PlacementDetailPage() {
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <Label>Status</Label>
-                      <Select
-                        value={editStatus}
-                        onChange={(e) => setEditStatus(e.target.value)}
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="open">Open</option>
-                        <option value="filled">Filled</option>
-                        <option value="closed">Closed</option>
+                      <Select value={editStatus} onValueChange={(v) => setEditStatus(v as typeof editStatus)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="draft">Draft</SelectItem>
+                          <SelectItem value="open">Open</SelectItem>
+                          <SelectItem value="filled">Filled</SelectItem>
+                          <SelectItem value="closed">Closed</SelectItem>
+                        </SelectContent>
                       </Select>
                     </div>
                     <div className="flex gap-2">

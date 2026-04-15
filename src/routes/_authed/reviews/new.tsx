@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getReviewablePlacements, createReview } from "@/server/reviews";
 import { Star } from "lucide-react";
 
@@ -106,13 +112,17 @@ function NewReviewPage() {
 
             <div className="space-y-2">
               <Label htmlFor="placementId">Placement</Label>
-              <Select id="placementId" name="placementId" required>
-                <option value="">Select a placement...</option>
-                {placements.map((p) => (
-                  <option key={p.placementId} value={p.placementId}>
-                    {p.placementTitle}
-                  </option>
-                ))}
+              <Select name="placementId" required>
+                <SelectTrigger id="placementId">
+                  <SelectValue placeholder="Select a placement..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {placements.map((p) => (
+                    <SelectItem key={p.placementId} value={p.placementId}>
+                      {p.placementTitle}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 

@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { createPlacement } from "@/server/placements";
 
 export const Route = createFileRoute("/_authed/placements/new")({
@@ -131,9 +137,14 @@ function NewPlacementPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="status">Initial status</Label>
-                <Select id="status" name="status" defaultValue="draft">
-                  <option value="draft">Draft (not visible)</option>
-                  <option value="open">Open (visible and accepting applications)</option>
+                <Select name="status" defaultValue="draft">
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft (not visible)</SelectItem>
+                    <SelectItem value="open">Open (visible and accepting applications)</SelectItem>
+                  </SelectContent>
                 </Select>
               </div>
             </div>
