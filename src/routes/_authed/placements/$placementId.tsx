@@ -32,6 +32,7 @@ import {
   Users,
   Mail,
   ArrowLeft,
+  Award,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/placements/$placementId")({
@@ -245,6 +246,36 @@ function PlacementDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {placement.competencies.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Award className="h-4 w-4" /> Competencies Developed
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(["behavioural", "technical"] as const).map((cat) => {
+                    const items = placement.competencies.filter((c) => c.category === cat);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={cat}>
+                        <p className="mb-1.5 text-xs font-medium capitalize text-muted-foreground">{cat}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {items.map((c) => (
+                            <Badge key={c.id} variant={cat === "technical" ? "default" : "secondary"}>
+                              {c.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

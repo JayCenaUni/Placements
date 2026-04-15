@@ -9,7 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getApprentice } from "@/server/apprentices";
-import { ArrowLeft, Building2, Phone, User, Clock, MoveRight } from "lucide-react";
+import { ArrowLeft, Building2, Phone, User, Clock, MoveRight, Award } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/apprentices/$apprenticeId")({
   loader: async ({ params }) => {
@@ -42,74 +42,111 @@ function ApprenticeDetailPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {apprentice.profile ? (
-              <>
-                {apprentice.profile.department && (
-                  <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {apprentice.profile ? (
+                <>
+                  {apprentice.profile.department && (
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Department</p>
+                        <p className="text-sm text-muted-foreground">
+                          {apprentice.profile.department}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {apprentice.profile.cohort && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Cohort</p>
+                        <p className="text-sm text-muted-foreground">
+                          {apprentice.profile.cohort}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {apprentice.profile.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-sm font-medium">Phone</p>
+                        <p className="text-sm text-muted-foreground">
+                          {apprentice.profile.phone}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {apprentice.profile.bio && (
                     <div>
-                      <p className="text-sm font-medium">Department</p>
-                      <p className="text-sm text-muted-foreground">
-                        {apprentice.profile.department}
+                      <p className="text-sm font-medium">Bio</p>
+                      <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">
+                        {apprentice.profile.bio}
                       </p>
                     </div>
-                  </div>
-                )}
-                {apprentice.profile.cohort && (
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  {apprentice.profile.skills && (
                     <div>
-                      <p className="text-sm font-medium">Cohort</p>
-                      <p className="text-sm text-muted-foreground">
-                        {apprentice.profile.cohort}
-                      </p>
+                      <p className="text-sm font-medium">Skills</p>
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {apprentice.profile.skills.split(",").map((skill, i) => (
+                          <Badge key={i} variant="secondary">
+                            {skill.trim()}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-                {apprentice.profile.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-medium">Phone</p>
-                      <p className="text-sm text-muted-foreground">
-                        {apprentice.profile.phone}
-                      </p>
-                    </div>
-                  </div>
-                )}
-                {apprentice.profile.bio && (
-                  <div>
-                    <p className="text-sm font-medium">Bio</p>
-                    <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">
-                      {apprentice.profile.bio}
-                    </p>
-                  </div>
-                )}
-                {apprentice.profile.skills && (
-                  <div>
-                    <p className="text-sm font-medium">Skills</p>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {apprentice.profile.skills.split(",").map((skill, i) => (
-                        <Badge key={i} variant="secondary">
-                          {skill.trim()}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                This apprentice hasn't set up their profile yet.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  This apprentice hasn't set up their profile yet.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" /> Competencies
+              </CardTitle>
+              <CardDescription>Competencies this apprentice has achieved</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {apprentice.competencies.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No competencies recorded yet.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {(["behavioural", "technical"] as const).map((cat) => {
+                    const items = apprentice.competencies.filter((c) => c.category === cat);
+                    if (items.length === 0) return null;
+                    return (
+                      <div key={cat}>
+                        <p className="mb-2 text-sm font-medium capitalize">{cat}</p>
+                        <div className="flex flex-wrap gap-1">
+                          {items.map((c) => (
+                            <Badge key={c.id} variant={cat === "technical" ? "default" : "secondary"}>
+                              {c.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="space-y-6">
           <Card>

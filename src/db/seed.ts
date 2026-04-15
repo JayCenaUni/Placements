@@ -11,10 +11,16 @@ import {
   session,
   account,
   verification,
+  competency,
+  apprenticeCompetency,
+  placementCompetency,
 } from "./schema";
 
 async function seed() {
   console.log("Clearing existing data...");
+  await db.delete(apprenticeCompetency);
+  await db.delete(placementCompetency);
+  await db.delete(competency);
   await db.delete(review);
   await db.delete(apprenticeRequest);
   await db.delete(application);
@@ -224,6 +230,92 @@ async function seed() {
         "Looking for an apprentice with AWS interest or experience. Certification study support available.",
       status: "open",
     },
+  ]);
+
+  console.log("Creating competencies...");
+  const compIds = {
+    communication: crypto.randomUUID(),
+    problemSolving: crypto.randomUUID(),
+    teamwork: crypto.randomUUID(),
+    timeManagement: crypto.randomUUID(),
+    adaptability: crypto.randomUUID(),
+    leadership: crypto.randomUUID(),
+    criticalThinking: crypto.randomUUID(),
+    professionalDev: crypto.randomUUID(),
+    softwareDev: crypto.randomUUID(),
+    versionControl: crypto.randomUUID(),
+    testingQA: crypto.randomUUID(),
+    cloudInfra: crypto.randomUUID(),
+    dataAnalysis: crypto.randomUUID(),
+    networking: crypto.randomUUID(),
+    securityFundamentals: crypto.randomUUID(),
+    systemDesign: crypto.randomUUID(),
+  };
+
+  await db.insert(competency).values([
+    { id: compIds.communication, name: "Communication", category: "behavioural", description: "Ability to convey information clearly and listen actively in professional settings" },
+    { id: compIds.problemSolving, name: "Problem Solving", category: "behavioural", description: "Systematic approach to identifying, analysing, and resolving challenges" },
+    { id: compIds.teamwork, name: "Teamwork", category: "behavioural", description: "Working collaboratively with others to achieve shared goals" },
+    { id: compIds.timeManagement, name: "Time Management", category: "behavioural", description: "Prioritising tasks and managing workload effectively to meet deadlines" },
+    { id: compIds.adaptability, name: "Adaptability", category: "behavioural", description: "Adjusting to new situations, technologies, and changing requirements" },
+    { id: compIds.leadership, name: "Leadership", category: "behavioural", description: "Guiding and motivating others, taking ownership of outcomes" },
+    { id: compIds.criticalThinking, name: "Critical Thinking", category: "behavioural", description: "Evaluating information objectively to make reasoned judgements" },
+    { id: compIds.professionalDev, name: "Professional Development", category: "behavioural", description: "Commitment to continuous learning and career growth" },
+    { id: compIds.softwareDev, name: "Software Development", category: "technical", description: "Writing clean, maintainable code following best practices and design patterns" },
+    { id: compIds.versionControl, name: "Version Control", category: "technical", description: "Using Git and branching strategies to manage code changes collaboratively" },
+    { id: compIds.testingQA, name: "Testing & QA", category: "technical", description: "Writing and executing tests to ensure software quality and reliability" },
+    { id: compIds.cloudInfra, name: "Cloud Infrastructure", category: "technical", description: "Deploying and managing applications on cloud platforms such as AWS, Azure, or GCP" },
+    { id: compIds.dataAnalysis, name: "Data Analysis", category: "technical", description: "Collecting, processing, and interpreting data to inform decisions" },
+    { id: compIds.networking, name: "Networking", category: "technical", description: "Understanding network protocols, architecture, and troubleshooting" },
+    { id: compIds.securityFundamentals, name: "Security Fundamentals", category: "technical", description: "Applying core security principles to protect systems and data" },
+    { id: compIds.systemDesign, name: "System Design", category: "technical", description: "Designing scalable, resilient systems and understanding architectural trade-offs" },
+  ]);
+
+  console.log("Assigning competencies to apprentices...");
+  await db.insert(apprenticeCompetency).values([
+    // Alice: has several competencies from her full-stack placement
+    { apprenticeId: apprentice1.user.id, competencyId: compIds.communication },
+    { apprenticeId: apprentice1.user.id, competencyId: compIds.teamwork },
+    { apprenticeId: apprentice1.user.id, competencyId: compIds.softwareDev },
+    { apprenticeId: apprentice1.user.id, competencyId: compIds.versionControl },
+    { apprenticeId: apprentice1.user.id, competencyId: compIds.problemSolving },
+    // Bob: data-focused competencies
+    { apprenticeId: apprentice2.user.id, competencyId: compIds.dataAnalysis },
+    { apprenticeId: apprentice2.user.id, competencyId: compIds.criticalThinking },
+    { apprenticeId: apprentice2.user.id, competencyId: compIds.timeManagement },
+    // Charlie: security-focused
+    { apprenticeId: apprentice3.user.id, competencyId: compIds.networking },
+    { apprenticeId: apprentice3.user.id, competencyId: compIds.securityFundamentals },
+    { apprenticeId: apprentice3.user.id, competencyId: compIds.adaptability },
+  ]);
+
+  console.log("Assigning competencies to placements...");
+  await db.insert(placementCompetency).values([
+    // Full-Stack Web Developer
+    { placementId: placementIds.p1, competencyId: compIds.softwareDev },
+    { placementId: placementIds.p1, competencyId: compIds.versionControl },
+    { placementId: placementIds.p1, competencyId: compIds.testingQA },
+    { placementId: placementIds.p1, competencyId: compIds.teamwork },
+    { placementId: placementIds.p1, competencyId: compIds.problemSolving },
+    { placementId: placementIds.p1, competencyId: compIds.systemDesign },
+    // Data Engineering
+    { placementId: placementIds.p2, competencyId: compIds.dataAnalysis },
+    { placementId: placementIds.p2, competencyId: compIds.softwareDev },
+    { placementId: placementIds.p2, competencyId: compIds.criticalThinking },
+    { placementId: placementIds.p2, competencyId: compIds.problemSolving },
+    { placementId: placementIds.p2, competencyId: compIds.systemDesign },
+    // Cloud Infrastructure
+    { placementId: placementIds.p3, competencyId: compIds.cloudInfra },
+    { placementId: placementIds.p3, competencyId: compIds.networking },
+    { placementId: placementIds.p3, competencyId: compIds.versionControl },
+    { placementId: placementIds.p3, competencyId: compIds.adaptability },
+    { placementId: placementIds.p3, competencyId: compIds.securityFundamentals },
+    // Security Operations
+    { placementId: placementIds.p4, competencyId: compIds.securityFundamentals },
+    { placementId: placementIds.p4, competencyId: compIds.networking },
+    { placementId: placementIds.p4, competencyId: compIds.criticalThinking },
+    { placementId: placementIds.p4, competencyId: compIds.communication },
+    { placementId: placementIds.p4, competencyId: compIds.leadership },
   ]);
 
   console.log("Seed complete!");

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { db } from "@/db";
-import { placement, application, user } from "@/db/schema";
+import { placement, application, user, placementCompetency, competency } from "@/db/schema";
 import { eq, sql, and, count } from "drizzle-orm";
 import { z } from "zod/v4";
 
@@ -57,10 +57,23 @@ export const getPlacement = createServerFn({ method: "GET" })
       .where(eq(application.placementId, id))
       .orderBy(sql`${application.appliedAt} DESC`);
 
+    const competencies = await db
+      .select({
+        id: competency.id,
+        name: competency.name,
+        category: competency.category,
+        description: competency.description,
+      })
+      .from(placementCompetency)
+      .innerJoin(competency, eq(placementCompetency.competencyId, competency.id))
+      .where(eq(placementCompetency.placementId, id))
+      .orderBy(competency.category, competency.name);
+
     return {
       ...result[0].placement,
       managerName: result[0].managerName ?? "Unknown",
       managerEmail: result[0].managerEmail ?? "",
+      competencies,
       applications: applications.map((a) => ({
         ...a.application,
         apprenticeName: a.apprenticeName,

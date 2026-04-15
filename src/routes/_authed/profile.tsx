@@ -13,11 +13,17 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { getProfile, updateProfile } from "@/server/apprentices";
+import { getApprenticeCompetencies } from "@/server/competencies";
+import { Award } from "lucide-react";
 
 export const Route = createFileRoute("/_authed/profile")({
   loader: async ({ context }) => {
     const data = await getProfile({ data: context.session.user.id });
-    return data;
+    const competencies =
+      context.session.user.role === "apprentice"
+        ? await getApprenticeCompetencies({ data: context.session.user.id })
+        : [];
+    return { ...data, competencies };
   },
   component: ProfilePage,
 });
@@ -29,7 +35,7 @@ const roleLabels: Record<string, string> = {
 };
 
 function ProfilePage() {
-  const { user: userData, profile } = Route.useLoaderData();
+  const { user: userData, profile, competencies } = Route.useLoaderData();
   const { session } = Route.useRouteContext();
   const navigate = useNavigate();
   const isApprentice = session.user.role === "apprentice";
@@ -221,6 +227,46 @@ function ProfilePage() {
                     You haven't set up your profile yet. Click Edit to get started.
                   </p>
                 )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {isApprentice && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" /> Competencies
+            </CardTitle>
+            <CardDescription>
+              Competencies you have achieved across your placements.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {competencies.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No competencies recorded yet. These will be added as you
+                progress through placements.
+              </p>
+            ) : (
+              <div className="space-y-4">
+                {(["behavioural", "technical"] as const).map((cat) => {
+                  const items = competencies.filter((c) => c.category === cat);
+                  if (items.length === 0) return null;
+                  return (
+                    <div key={cat}>
+                      <p className="mb-2 text-sm font-medium capitalize">{cat}</p>
+                      <div className="flex flex-wrap gap-1">
+                        {items.map((c) => (
+                          <Badge key={c.id} variant={cat === "technical" ? "default" : "secondary"}>
+                            {c.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </CardContent>

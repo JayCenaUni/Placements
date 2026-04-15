@@ -151,6 +151,34 @@ export const apprenticeRequest = sqliteTable("apprentice_request", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
 
+export const competency = sqliteTable("competency", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  category: text("category", { enum: ["behavioural", "technical"] }).notNull(),
+  description: text("description"),
+});
+
+export const apprenticeCompetency = sqliteTable("apprentice_competency", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  apprenticeId: text("apprentice_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  competencyId: text("competency_id")
+    .notNull()
+    .references(() => competency.id, { onDelete: "cascade" }),
+  achievedAt: integer("achieved_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+export const placementCompetency = sqliteTable("placement_competency", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  placementId: text("placement_id")
+    .notNull()
+    .references(() => placement.id, { onDelete: "cascade" }),
+  competencyId: text("competency_id")
+    .notNull()
+    .references(() => competency.id, { onDelete: "cascade" }),
+});
+
 // ── Type exports ────────────────────────────────────────────────────────────
 
 export type User = typeof user.$inferSelect;
@@ -162,3 +190,6 @@ export type Application = typeof application.$inferSelect;
 export type Review = typeof review.$inferSelect;
 export type ManagerAssignment = typeof managerAssignment.$inferSelect;
 export type ApprenticeRequest = typeof apprenticeRequest.$inferSelect;
+export type Competency = typeof competency.$inferSelect;
+export type ApprenticeCompetency = typeof apprenticeCompetency.$inferSelect;
+export type PlacementCompetency = typeof placementCompetency.$inferSelect;

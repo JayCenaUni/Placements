@@ -6,6 +6,8 @@ import {
   managerAssignment,
   placement,
   application,
+  apprenticeCompetency,
+  competency,
 } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -115,6 +117,19 @@ export const getApprentice = createServerFn({ method: "GET" })
       )
       .orderBy(sql`${application.appliedAt} DESC`);
 
+    const competencies = await db
+      .select({
+        id: competency.id,
+        name: competency.name,
+        category: competency.category,
+        description: competency.description,
+        achievedAt: apprenticeCompetency.achievedAt,
+      })
+      .from(apprenticeCompetency)
+      .innerJoin(competency, eq(apprenticeCompetency.competencyId, competency.id))
+      .where(eq(apprenticeCompetency.apprenticeId, id))
+      .orderBy(competency.category, competency.name);
+
     return {
       id: r.user.id,
       name: r.user.name,
@@ -124,6 +139,7 @@ export const getApprentice = createServerFn({ method: "GET" })
       currentPlacementTitle: r.currentPlacementTitle ?? null,
       currentPlacementDepartment: r.currentPlacementDepartment ?? null,
       placementManagerName: r.placementManagerName ?? null,
+      competencies,
       placementHistory: approvedApps.map((a) => ({
         placementId: a.application.placementId,
         placementTitle: a.placementTitle,
